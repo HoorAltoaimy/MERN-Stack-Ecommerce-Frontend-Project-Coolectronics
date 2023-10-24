@@ -5,10 +5,10 @@ import {
   productsRequest,
   productsSuccess,
   removeProduct
-} from '../redux/slices/products/productSlice'
-import { AppDispatch, RootState } from '../redux/store'
+} from '../../redux/slices/products/productSliceI'
+import { AppDispatch, RootState } from '../../redux/store'
 import { NewProductWrapper } from './NewProductWrapper'
-import api from '../api'
+import api from '../../api'
 
 export function ProductsManager() {
   const dispatch = useDispatch<AppDispatch>()
@@ -19,7 +19,7 @@ export function ProductsManager() {
     handleGetProducts()
   }, [])
 
-   /**
+  /**
    * If you want to keep things simple you can follow this approach on updating
    * redux state when using async requests instead of using createAsyncThunk
    */

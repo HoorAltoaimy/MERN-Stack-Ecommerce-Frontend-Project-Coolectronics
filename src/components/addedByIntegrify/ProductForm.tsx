@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent } from 'react'
-import { Product } from '../redux/slices/products/productSlice'
+import { Product } from '../../redux/slices/products/productSliceI'
 
 type ProductFormProps = {
   product: Product

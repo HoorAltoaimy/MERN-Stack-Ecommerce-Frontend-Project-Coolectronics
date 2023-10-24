@@ -1,3 +1,4 @@
+//axios setup
 import axios from 'axios'
 
 const isDevelopment = import.meta.env.MODE === 'development'

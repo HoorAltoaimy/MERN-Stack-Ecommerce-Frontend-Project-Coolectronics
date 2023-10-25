@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { Product, fetchProducts } from '../redux/slices/products/productsSlice'
 
 const Home = () => {
-  const { products, isLoading, error } = useSelector((state: RootState) => state.products)
+  const { products, isLoading, error } = useSelector((state: RootState) => state.productsReducer)
 
   const dispatch: AppDispatch = useDispatch()
 
@@ -13,12 +13,12 @@ const Home = () => {
   }, [])
 
   if (isLoading) {
-    return <p>loading</p>
+    return <p>Loading...</p>
   }
   if (error) {
     return <p>{error}</p>
   }
-  console.log(products)
+
   return (
     <div className="home-container">
       <h2>Home page</h2>
@@ -35,6 +35,7 @@ const Home = () => {
                 <p>{categories}</p>
                 <p>{variants}</p>
                 <p>{sizes}</p>
+                <button>Add to cart</button>
               </article>
             )
           })}

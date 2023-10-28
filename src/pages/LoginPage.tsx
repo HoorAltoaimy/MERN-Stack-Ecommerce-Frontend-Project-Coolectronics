@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 import { AppDispatch, RootState } from '../redux/store'
 import { fetchUsers, login } from '../redux/slices/users/userSlice'
-import { toast } from 'react-toastify'
+// import { toast } from 'react-toastify'
 
 const LoginPage = () => {
   const { users } = useSelector((state: RootState) => state.usersReducer)
@@ -30,19 +30,28 @@ const LoginPage = () => {
       const userFound = users.find(
         (userData) => userData.email === user.email && userData.password === user.password
       )
+
+      if (!userFound) {
+        console.log('Wrong email or password')
+        // toast('wrong info!')
+        return
+      }
+      if (userFound.isBlocked) {
+        console.log('You are blocked!')
+        // toast('wrong info!')
+        return
+      }
       if (userFound) {
         dispatch(login(userFound))
         if (userFound.role === 'admin') {
           navigate('/admin/adminDashboard')
         }
-        if (userFound.role === 'visitor') {
-          navigate('/visitor/visitorProfile')
+        if (userFound.role === 'user') {
+          navigate('/user/userProfile')
         }
-      } else {
-        console.log('wrong info')
-        toast('wrong info!')
       }
-    } catch (error) {
+    }
+     catch (error) {
       console.log(error)
     }
 

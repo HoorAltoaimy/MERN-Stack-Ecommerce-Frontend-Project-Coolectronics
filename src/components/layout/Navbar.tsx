@@ -4,7 +4,12 @@ import { RootState } from '../../redux/store'
 
 const Navbar = () => {
   const { isLoggedin, userData } = useSelector((state: RootState) => state.usersReducer)
-
+  
+  let userRole
+  if (userData) {
+  userRole = userData.role
+  }
+  
   return (
     <div>
       <nav className="navbar">
@@ -12,17 +17,20 @@ const Navbar = () => {
           <li>
             <Link to="/">Home</Link>
           </li>
-          <li>
-            <Link to="/login">Login</Link>
-          </li>
-          {isLoggedin && userData.role === 'admin' && (
+          {!isLoggedin && (
+            <li>
+              <Link to="/login">Login</Link>
+            </li>
+          )}
+
+          {isLoggedin && userRole === 'admin' && (
             <li>
               <Link to="/admin/adminDashboard">Admin Dashboard</Link>
             </li>
           )}
-          {isLoggedin && userData.role === 'visitor' && (
+          {isLoggedin && userRole === 'user' && (
             <li>
-              <Link to="/visitor/visitorProfile">Visitor Profile</Link>
+              <Link to="/user/userProfile">User Profile</Link>
             </li>
           )}
         </ul>

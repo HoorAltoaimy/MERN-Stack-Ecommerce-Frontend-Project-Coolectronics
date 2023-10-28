@@ -12,23 +12,36 @@ export type OrdersState = {
   orders: Order[]
   error: null | string
   isLoading: boolean
+  searchInput: string
 }
 
 const initialState: OrdersState = {
   orders: [],
   error: null,
-  isLoading: false
+  isLoading: false,
+  searchInput: ''
 }
 
 export const fetchOrders = createAsyncThunk('fetchOrders', async () => {
-  const response = await api.get('/mock/e-commerce/orders.json')
-  return response.data
+  try {
+    const response = await api.get('/mock/e-commerce/orders.json')
+    if (!response) {
+      throw new Error('Network erroe')
+    }
+    return response.data
+  } catch (error) {
+    console.log(error)
+  }
 })
 
 export const ordersSlice = createSlice({
   name: 'orders',
   initialState,
-  reducers: {},
+  reducers: {
+    searchOrder: (state, action) => {
+      state.searchInput = action.payload
+    }
+  },
   extraReducers(builder) {
     builder.addCase(fetchOrders.pending, (state) => {
       state.isLoading = true
@@ -44,4 +57,5 @@ export const ordersSlice = createSlice({
   }
 })
 
+export const { searchOrder } = ordersSlice.actions
 export default ordersSlice.reducer

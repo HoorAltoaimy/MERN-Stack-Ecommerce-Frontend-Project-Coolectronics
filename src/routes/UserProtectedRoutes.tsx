@@ -3,15 +3,15 @@ import { RootState } from '../redux/store'
 import { Outlet } from 'react-router-dom'
 import LoginPage from '../pages/LoginPage'
 
-const VisitorProtectedRoutes = () => {
+const UserProtectedRoutes = () => {
   const { isLoggedin, userData } = useSelector((state: RootState) => state.usersReducer)
-  let visitor
-  if (userData.role === 'visitor') {
-    visitor = true
+  let user
+  if (userData && userData.role === 'user') {
+    user = true
   } else {
-    visitor = false
+    user = false
   }
-  return isLoggedin && visitor ? <Outlet /> : <LoginPage />
+  return isLoggedin && user ? <Outlet /> : <LoginPage />
 }
 
-export default VisitorProtectedRoutes
+export default UserProtectedRoutes

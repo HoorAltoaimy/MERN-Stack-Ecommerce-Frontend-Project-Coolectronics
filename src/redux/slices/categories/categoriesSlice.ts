@@ -19,14 +19,32 @@ const initialState: CategoriesState = {
 }
 
 export const fetchCategories = createAsyncThunk('fetchCategories', async () => {
-  const response = await api.get('/mock/e-commerce/categories.json')
-  return response.data
+  try {
+    const response = await api.get('/mock/e-commerce/categories.json')
+    if (!response) {
+      throw new Error('Network erroe')
+    }
+    return response.data
+  } catch (error) {
+    console.log(error)
+  }
 })
 
 export const categoriesSlice = createSlice({
   name: 'categories',
   initialState,
-  reducers: {},
+  reducers: {
+    addCategory: (state, action) => {
+      state.categories.push(action.payload)
+    },
+    deleteCategory: (state, action) => {
+      const id = action.payload
+      const filteredCategories = state.categories.filter((category) => category.id !== id)
+      if (filteredCategories) {
+        state.categories = filteredCategories
+      }
+    }
+  },
   extraReducers(builder) {
     builder.addCase(fetchCategories.pending, (state) => {
       state.isLoading = true
@@ -42,4 +60,5 @@ export const categoriesSlice = createSlice({
   }
 })
 
+export const { addCategory, deleteCategory } = categoriesSlice.actions
 export default categoriesSlice.reducer

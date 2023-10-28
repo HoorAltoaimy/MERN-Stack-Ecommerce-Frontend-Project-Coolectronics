@@ -72,7 +72,12 @@ grid-template-columns: auto auto auto;
   display: grid;
   grid-template-columns: auto auto auto;
   gap: 2rem;
+  background-color: rgb(245, 210, 215);
 }
+
+/* .users-card{
+   background-color: rgb(245, 210, 215); 
+} */
 
 @media screen and (max-width: 768px){
   .home-products {
@@ -86,5 +91,14 @@ grid-template-columns: auto auto auto;
     background-color: pink;
     display: grid;
     grid-template-columns: auto;
+  }
+}
+
+@media screen and (max-width: 500px) {
+.admin-main-content {
+    display: grid;
+    grid-template-columns: auto;
+    gap: 2rem;
+    background-color: rgb(245, 210, 215);
   }
 }

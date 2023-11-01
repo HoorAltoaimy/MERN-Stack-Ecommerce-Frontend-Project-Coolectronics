@@ -9,7 +9,7 @@ const Search = ({ searchInput, handleSearch }: SearchPropsType) => {
   return (
     <div>
       <form>
-        <input
+        <input className='search'
           type="text"
           name="search"
           id="search"

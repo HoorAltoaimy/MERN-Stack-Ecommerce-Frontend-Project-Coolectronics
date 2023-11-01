@@ -16,6 +16,7 @@ import AdminProtectedRoutes from './AdminProtectedRout'
 import Register from '../pages/Register'
 import UserProfile from '../pages/UserProfile'
 import UserProtectedRoutes from './UserProtectedRoutes'
+import EditCategory from '../components/adminComponents/EditCategory'
 
 const Index = () => {
   return (
@@ -30,6 +31,7 @@ const Index = () => {
         <Route path="/admin" element={<AdminProtectedRoutes />}>
           <Route path="adminDashboard" element={<AdminDashboard />} />
           <Route path="adminDashboard/categories" element={<Categories />} />
+          <Route path="adminDashboard/categories/editCategory" element={<EditCategory />}></Route>
           <Route path="adminDashboard/products" element={<Products />} />
           <Route path="adminDashboard/users" element={<Users />} />
           <Route path="adminDashboard/orders" element={<Orders />} />

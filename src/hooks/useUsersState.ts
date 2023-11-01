@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux'
 import { RootState } from '../redux/store'
 
-const useUserState = () => {
+const useUsersState = () => {
   const { users, isLoading, error, searchInput, isLoggedin, userData } = useSelector(
     (state: RootState) => state.usersReducer
   )
@@ -9,4 +9,4 @@ const useUserState = () => {
   return { users, isLoading, error, searchInput, isLoggedin, userData }
 }
 
-export default useUserState
+export default useUsersState

@@ -3,12 +3,13 @@ import { FaUser } from 'react-icons/fa'
 import { AppDispatch } from '../../redux/store'
 import { useDispatch } from 'react-redux'
 import { logout } from '../../redux/slices/users/userSlice'
+import useUserState from '../../hooks/useUsersState'
 
 const AdminSidebar = () => {
-
+  const { userData } = useUserState()
   const dispatch: AppDispatch = useDispatch()
   const navigate = useNavigate()
-  
+
   const handleClick = () => {
     dispatch(logout())
     navigate('/')
@@ -17,13 +18,21 @@ const AdminSidebar = () => {
   return (
     <aside className="sidebar">
       <div className="admin-profile">
-        <h3>Admin Profile</h3>
-        <FaUser />
-        <p>admin name</p>
-        <button onClick={handleClick}>logout</button>
+        <div className="admin-info">
+          <h3>Admin Profile</h3>
+        </div>
+        <div className="admin-info">
+          <FaUser />
+        </div>
+        <div className="admin-info">
+          <p>{userData?.firstName + ' ' + userData?.lastName}</p>
+        </div>
+        <div className="admin-info">
+          <p>{userData?.email}</p>
+        </div>
       </div>
 
-      <ul>
+      <ul className="admin-routes">
         <li>
           <Link to="/admin/adminDashboard/categories">Categories</Link>
         </li>

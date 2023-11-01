@@ -40,6 +40,11 @@ export const ordersSlice = createSlice({
   reducers: {
     searchOrder: (state, action) => {
       state.searchInput = action.payload
+    },
+    deleteOrder: (state, action) => {
+      const id = action.payload
+      const filteredOrders = state.orders.filter((order) => order.id !== id)
+      state.orders = filteredOrders
     }
   },
   extraReducers(builder) {
@@ -57,5 +62,5 @@ export const ordersSlice = createSlice({
   }
 })
 
-export const { searchOrder } = ordersSlice.actions
+export const { searchOrder, deleteOrder } = ordersSlice.actions
 export default ordersSlice.reducer

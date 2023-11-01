@@ -1,25 +1,20 @@
 import { useDispatch } from 'react-redux'
 import AdminSidebar from './AdminSidebar'
 import { AppDispatch } from '../../redux/store'
-import { ChangeEvent, useEffect } from 'react'
+import { ChangeEvent} from 'react'
 import {
   User,
   blockUser,
   deleteUser,
-  fetchUsers,
   searchUser
 } from '../../redux/slices/users/userSlice'
 import Search from '../Search'
-import useUserState from '../../hooks/useUserState'
+import useUsersState from '../../hooks/useUsersState'
 
 const Users = () => {
-  const { users, isLoading, error, searchInput } = useUserState()
+  const { users, isLoading, error, searchInput } = useUsersState()
 
   const dispatch: AppDispatch = useDispatch()
-
-  useEffect(() => {
-    dispatch(fetchUsers())
-  }, [])
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     const searchItem = event.target.value
@@ -46,42 +41,59 @@ const Users = () => {
   }
 
   return (
-    <div className="container">
+    <div className="admin-container">
       <AdminSidebar />
-      <div className="main-content">
-        <h3>Users</h3>
-        <Search searchInput={searchInput} handleSearch={handleSearch} />
-        <div className="admin-main-content">
+
+      <div className="admin-main-content">
+        <h3 className="title">USERS</h3>
+
+        <div className="search-div">
+          <Search searchInput={searchInput} handleSearch={handleSearch} />
+        </div>
+
+        <table>
+          <thead>
+            <td>ID</td>
+            <td>Name</td>
+            <td>Email</td>
+            <td>Delete User</td>
+            <td>Block User</td>
+          </thead>
           {searchResult.length > 0 &&
             searchResult.map((user: User) => {
-              const { id, firstName, lastName, email, password, role, isBlocked } = user
+              const { id, firstName, lastName, email, role, isBlocked } = user
               if (role !== 'admin') {
                 return (
-                  <article key={id} className="users-card">
-                    <p>user id: {id}</p>
-                    <p>
-                      name: {firstName} {lastName}{' '}
-                    </p>
-                    <p>email: {email}</p>
-                    <p>password: {password}</p>
-                    <p>role: {role}</p>
-                    <button
-                      onClick={() => {
-                        handleDeleteUser(id)
-                      }}>
-                      Delete
-                    </button>
-                    <button
-                      onClick={() => {
-                        handleBlockUser(id)
-                      }}>
-                      {isBlocked ? 'Unblock' : 'Block'}
-                    </button>
-                  </article>
+                  <tr key={id} className="users-card">
+                    <td>{id}</td>
+                    <td>
+                      {firstName} {lastName}
+                    </td>
+                    <td>{email}</td>
+                    <td>
+                      <button
+                        className="btn"
+                        onClick={() => {
+                          handleDeleteUser(id)
+                        }}>
+                        Delete
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        className="btn"
+                        onClick={() => {
+                          handleBlockUser(id)
+                        }}>
+                        {isBlocked ? 'Unblock' : 'Block'}
+                      </button>
+                    </td>
+                  </tr>
                 )
               }
             })}
-        </div>
+        </table>
+        
       </div>
     </div>
   )

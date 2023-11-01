@@ -1,20 +1,18 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { ChangeEvent, FormEvent, useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { AppDispatch, RootState } from '../redux/store'
-import { fetchUsers, login } from '../redux/slices/users/userSlice'
-// import { toast } from 'react-toastify'
+import { AppDispatch } from '../redux/store'
+import { login } from '../redux/slices/users/userSlice'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.min.css'
+import useUsersState from '../hooks/useUsersState'
 
 const LoginPage = () => {
-  const { users } = useSelector((state: RootState) => state.usersReducer)
+  const { users } = useUsersState()
   const navigate = useNavigate()
   const [user, setUser] = useState({ email: '', password: '' })
 
   const dispatch: AppDispatch = useDispatch()
-
-  useEffect(() => {
-    dispatch(fetchUsers())
-  }, [])
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
@@ -32,13 +30,19 @@ const LoginPage = () => {
       )
 
       if (!userFound) {
-        console.log('Wrong email or password')
-        // toast('wrong info!')
+        toast.error('Wrong email or password')
+        setUser({
+          email: '',
+          password: ''
+        })
         return
       }
       if (userFound.isBlocked) {
-        console.log('You are blocked!')
-        // toast('wrong info!')
+        toast.error('You are blocked!')
+        setUser({
+          email: '',
+          password: ''
+        })
         return
       }
       if (userFound) {
@@ -50,8 +54,7 @@ const LoginPage = () => {
           navigate('/user/userProfile')
         }
       }
-    }
-     catch (error) {
+    } catch (error) {
       console.log(error)
     }
 
@@ -62,26 +65,32 @@ const LoginPage = () => {
   }
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="email">Email</label>
-        <input type="text" name="email" id="email" value={user.email} onChange={handleChange} />
+    <div className="body">
+      <div className="login-div">
+        <form className="login-form" onSubmit={handleSubmit}>
+          <label htmlFor="email">Email:</label>
+          <input type="text" name="email" id="email" value={user.email} onChange={handleChange} />
 
-        <label htmlFor="password">Password</label>
-        <input
-          type="text"
-          name="password"
-          id="password"
-          value={user.password}
-          onChange={handleChange}
-        />
+          <label htmlFor="password">Password:</label>
+          <input
+            // type="password"
+            type="text"
+            name="password"
+            id="password"
+            value={user.password}
+            onChange={handleChange}
+          />
 
-        <button type="submit">Login</button>
+          <button className="btn" type="submit">
+            Login
+          </button>
+          <ToastContainer autoClose={3000} position={toast.POSITION.TOP_CENTER} />
 
-        <p>
-          You do not have an account? <Link to="/register">Register here</Link>
-        </p>
-      </form>
+          <p>
+            Do not have an account? <Link to="/register">Register here</Link>
+          </p>
+        </form>
+      </div>
     </div>
   )
 }

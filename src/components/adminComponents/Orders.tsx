@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import AdminSidebar from './AdminSidebar'
 import { AppDispatch, RootState } from '../../redux/store'
 import { ChangeEvent, useEffect } from 'react'
-import { Order, fetchOrders, searchOrder } from '../../redux/slices/orders/ordersSlice'
+import { Order, deleteOrder, fetchOrders, searchOrder } from '../../redux/slices/orders/ordersSlice'
 import Search from '../Search'
 
 const Orders = () => {
@@ -26,6 +26,10 @@ const Orders = () => {
     ? orders.filter((order) => order.id === Number(searchInput))
     : orders
   
+  const handleDeleteOrder = (id: number) => {
+    dispatch(deleteOrder(id))
+  }
+  
   if (isLoading) {
     return <p>Loading...</p>
   }
@@ -34,25 +38,42 @@ const Orders = () => {
   }
 
   return (
-    <div className="container">
+    <div className="admin-container">
       <AdminSidebar />
-      <div className="main-content">
-        <h3>Orders</h3>
+      <div className="admin-main-content">
+        <h3 className="title">Orders</h3>
         <Search searchInput={searchInput} handleSearch={handleSearch} />
-        <div className="admin-main-content">
+
+        <table>
+          <thead>
+            <td>Order ID</td>
+            <td>Product ID</td>
+            <td>User ID</td>
+            <td>Purchased at</td>
+            <td>Cancel Order</td>
+          </thead>
           {searchResult.length > 0 &&
             searchResult.map((order: Order) => {
               const { id, productId, userId, purchasedAt } = order
               return (
-                <article key={id}>
-                  <p>Order ID: {id} </p>
-                  <p>Product ID: {productId} </p>
-                  <p>User ID: {userId} </p>
-                  <p>Purchased at: {purchasedAt} </p>
-                </article>
+                <tr key={id}>
+                  <td>{id} </td>
+                  <td>{productId} </td>
+                  <td>{userId} </td>
+                  <td>{purchasedAt} </td>
+                  <td>
+                    <button
+                      className="btn"
+                      onClick={() => {
+                        handleDeleteOrder(id)
+                      }}>
+                      Cancel
+                    </button>
+                  </td>
+                </tr>
               )
             })}
-        </div>
+        </table>
       </div>
     </div>
   )

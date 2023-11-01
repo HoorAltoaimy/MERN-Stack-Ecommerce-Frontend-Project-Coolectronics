@@ -10,12 +10,20 @@ export type CategoriesState = {
   categories: Category[]
   error: null | string
   isLoading: boolean
+  category: null | Category
 }
+
+const categoryData =
+  localStorage.getItem('categoryData') !== null
+    ? JSON.parse(String(localStorage.getItem('categoryData')))
+    : []
 
 const initialState: CategoriesState = {
   categories: [],
   error: null,
-  isLoading: false
+  isLoading: false,
+  // category: {} as Category
+  category: categoryData.category
 }
 
 export const fetchCategories = createAsyncThunk('fetchCategories', async () => {
@@ -43,6 +51,13 @@ export const categoriesSlice = createSlice({
       if (filteredCategories) {
         state.categories = filteredCategories
       }
+    },
+    editCategory: (state, action) => {
+      const { id, name } = action.payload
+      const categoryFound = state.categories.find((category) => category.id === id)
+      if (categoryFound) {
+        categoryFound.name = name
+      }
     }
   },
   extraReducers(builder) {
@@ -54,11 +69,11 @@ export const categoriesSlice = createSlice({
       state.isLoading = false
     })
     builder.addCase(fetchCategories.rejected, (state, action) => {
-      state.error = action.error.message || 'Error has occured!'
+      state.error = action.error.message || 'An Error has occured!'
       state.isLoading = false
     })
   }
 })
 
-export const { addCategory, deleteCategory } = categoriesSlice.actions
+export const { addCategory, deleteCategory, editCategory } = categoriesSlice.actions
 export default categoriesSlice.reducer

@@ -74,6 +74,19 @@ export const productsSlice = createSlice({
       const id = action.payload
       const filteredProducts = state.products.filter((product) => product.id !== id)
       state.products = filteredProducts
+    },
+    editProduct: (state, action) => {
+      const { id, name, image, description, categories, variants, sizes, price } = action.payload
+      const productFound = state.products.find((product) => product.id === id)
+      if (productFound) {
+        productFound.name = name
+        productFound.image = image
+        productFound.description = description
+        productFound.categories = categories
+        productFound.variants = variants
+        productFound.sizes = sizes
+        productFound.price = price
+      }
     }
   },
   extraReducers(builder) {
@@ -85,12 +98,12 @@ export const productsSlice = createSlice({
       state.isLoading = false
     })
     builder.addCase(fetchProducts.rejected, (state, action) => {
-      state.error = action.error.message || 'Error has occured!'
+      state.error = action.error.message || 'An Error has occured!'
       state.isLoading = false
     })
   }
 })
 
-export const { searchProduct, sortProducts, showProductDetailes, addProduct, deleteProduct } =
+export const { searchProduct, sortProducts, showProductDetailes, addProduct, deleteProduct, editProduct } =
   productsSlice.actions
 export default productsSlice.reducer

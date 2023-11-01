@@ -15,7 +15,7 @@
     "email": "jane.smith@example.com",
     "password": "hashed_password",
     "role": "user",
-    "isBlocked": false
+    "isBlocked": true
   },
   {
     "id": 3,

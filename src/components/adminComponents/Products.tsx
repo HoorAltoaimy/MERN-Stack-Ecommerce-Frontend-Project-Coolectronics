@@ -1,67 +1,101 @@
 import { useDispatch } from 'react-redux'
 import AdminSidebar from './AdminSidebar'
 import { AppDispatch } from '../../redux/store'
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useState } from 'react'
 import {
   Product,
   addProduct,
-  fetchProducts,
   searchProduct,
-  deleteProduct
+  deleteProduct,
+  editProduct
 } from '../../redux/slices/products/productsSlice'
 import Search from '../Search'
 import { v4 as uuidv4 } from 'uuid'
-import useProductState from '../../hooks/useProductState'
+import useProductsState from '../../hooks/useProductsState'
 
 const Products = () => {
-  const { products, isLoading, error, searchInput } = useProductState()
+  const { products, isLoading, error, searchInput } = useProductsState()
 
-  const [newProduct, setNewProduct] = useState({
-    id: '',
+  const [productInfo, setProductInfo] = useState({
     name: '',
     image: '',
     description: '',
-    categories: [],
-    variants: [],
-    sizes: [],
+    categories: [0],
+    variants: [''],
+    sizes: [''],
     price: 0
   })
+  const [isEdit, setIsEdit] = useState(false)
+  const [editId, setEditId] = useState(0)
 
   const dispatch: AppDispatch = useDispatch()
 
-  useEffect(() => {
-    dispatch(fetchProducts())
-  }, [])
-
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
-    // setNewProduct((prevProducts) => {
-    //   return { ...prevProducts, [name]: value }
-    // })
 
     const isList = name === 'categories' || name === 'variants' || name === 'sizes'
     if (isList) {
-      setNewProduct({
-        ...newProduct,
+      setProductInfo({
+        ...productInfo,
         [name]: value.split(',')
       })
       return
     }
 
-    setNewProduct({
-      ...newProduct,
+    setProductInfo({
+      ...productInfo,
       [name]: value
     })
   }
 
+  const handleEditProduct = (
+    id: number,
+    name: string,
+    image: string,
+    description: string,
+    categories: number[],
+    variants: string[],
+    sizes: string[],
+    price: number
+  ) => {
+    setEditId(id)
+    setIsEdit(!isEdit)
+
+    if (!isEdit) {
+      setProductInfo({
+        name,
+        image,
+        description,
+        categories,
+        variants,
+        sizes,
+        price
+      })
+    } else {
+      setProductInfo({
+        name: '',
+        image: '',
+        description: '',
+        categories: [],
+        variants: [],
+        sizes: [],
+        price: 0
+      })
+    }
+  }
+
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    newProduct.id = uuidv4()
 
-    dispatch(addProduct(newProduct))
-    console.log(products) //1 issue in adding the new category to the categories array
-    setNewProduct({
-      id: '',
+    if (isEdit) {
+      const editProductData = { id: editId, ...productInfo }
+      dispatch(editProduct(editProductData))
+    } else {
+      const newProductt = { id: uuidv4(), ...productInfo }
+      dispatch(addProduct(newProductt))
+    }
+
+    setProductInfo({
       name: '',
       image: '',
       description: '',
@@ -84,7 +118,7 @@ const Products = () => {
   const handleDeleteProduct = (id: number) => {
     dispatch(deleteProduct(id))
   }
-  
+
   if (isLoading) {
     return <p>Loading...</p>
   }
@@ -93,18 +127,17 @@ const Products = () => {
   }
 
   return (
-    <div className="container">
+    <div className="admin-container">
       <AdminSidebar />
-      <div className="main-content">
+      <div className="admin-main-content">
         <form onSubmit={handleSubmit}>
-          <h3>Create New Product</h3>
-          {/*add default static img*/}
+          <h4 className="title">Create New Product</h4>
           <label htmlFor="name">Product name:</label>
           <input
             type="text"
             name="name"
             id="name"
-            value={newProduct.name}
+            value={productInfo.name}
             onChange={handleChange}
           />
           <label htmlFor="image"> Image URL:</label>
@@ -112,7 +145,7 @@ const Products = () => {
             type="text"
             name="image"
             id="image"
-            value={newProduct.image}
+            value={productInfo.image}
             onChange={handleChange}
           />
           <label htmlFor="description">Product descripton:</label>
@@ -120,7 +153,7 @@ const Products = () => {
             type="text"
             name="description"
             id="description"
-            value={newProduct.description}
+            value={productInfo.description}
             onChange={handleChange}
           />
           <label htmlFor="categories">Product categories:</label>
@@ -128,7 +161,7 @@ const Products = () => {
             type="text"
             name="categories"
             id="categories"
-            value={newProduct.categories.join(',')}
+            value={productInfo.categories.join(',')}
             onChange={handleChange}
           />
           <label htmlFor="variants">Product variants:</label>
@@ -136,7 +169,7 @@ const Products = () => {
             type="text"
             name="variants"
             id="variants"
-            value={newProduct.variants.join(',')}
+            value={productInfo.variants.join(',')}
             onChange={handleChange}
           />
           <label htmlFor="sizes">Product sizes:</label>
@@ -144,7 +177,7 @@ const Products = () => {
             type="text"
             name="sizes"
             id="sizes"
-            value={newProduct.sizes.join(',')}
+            value={productInfo.sizes.join(',')}
             onChange={handleChange}
           />
           <label htmlFor="price">Product price:</label>
@@ -152,21 +185,23 @@ const Products = () => {
             type="text"
             name="price"
             id="price"
-            value={newProduct.price}
+            value={productInfo.price}
             onChange={handleChange}
           />
 
-          <button type="submit">Create</button>
+          <button type="submit" className="btn">
+            {isEdit ? 'Save' : 'Create'}
+          </button>
         </form>
 
-        <h3>Products:</h3>
+        <h3 className="title">PRODUCTS</h3>
         <Search searchInput={searchInput} handleSearch={handleSearch} />
-        <div className="admin-main-content">
+        <div className="products-container">
           {searchResult.length > 0 &&
             searchResult.map((product: Product) => {
               const { id, name, image, description, categories, variants, sizes, price } = product
               return (
-                <article key={id} className="admin-products">
+                <article className="product-card" key={id}>
                   <img src={image} alt={name} width={100} height={100} />
                   <p>{id}</p>
                   <p>{name}</p>
@@ -174,9 +209,30 @@ const Products = () => {
                   <p>{categories}</p>
                   <p>{variants}</p>
                   <p>{sizes}</p>
-                  <p>{price}</p>
-                  <button>Edit</button>
-                  <button onClick={() => {handleDeleteProduct(id)}}>Delete</button>
+                  <p>${price}</p>
+                  <button
+                    className="btn"
+                    onClick={() => {
+                      handleEditProduct(
+                        id,
+                        name,
+                        image,
+                        description,
+                        categories,
+                        variants,
+                        sizes,
+                        price
+                      )
+                    }}>
+                    Edit
+                  </button>
+                  <button
+                    className="btn"
+                    onClick={() => {
+                      handleDeleteProduct(id)
+                    }}>
+                    Delete
+                  </button>
                 </article>
               )
             })}

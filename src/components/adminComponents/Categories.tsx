@@ -1,45 +1,52 @@
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import AdminSidebar from './AdminSidebar'
-import { AppDispatch, RootState } from '../../redux/store'
+import { AppDispatch } from '../../redux/store'
 import {
   Category,
   addCategory,
   deleteCategory,
-  fetchCategories
+  editCategory
 } from '../../redux/slices/categories/categoriesSlice'
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useState } from 'react'
+import useCategoriesState from '../../hooks/useCategoriesState'
+import { v4 as uuidv4 } from 'uuid'
 
 const Categories = () => {
-  const { categories, isLoading, error } = useSelector(
-    (state: RootState) => state.categoriesReducer
-  )
+  const { categories, isLoading, error } = useCategoriesState()
 
-  const [newCategory, setNewCategory] = useState({
-    id: 0,
-    name: ''
-  })
+  const [categoryName, setCategoryName] = useState('')
+  const [isEdit, setIsEdit] = useState(false)
+  const [editId, setEditId] = useState(0)
 
   const dispatch: AppDispatch = useDispatch()
 
-  useEffect(() => {
-    dispatch(fetchCategories())
-  }, [])
-
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target
-    setNewCategory((prevCategories) => {
-      return { ...prevCategories, [name]: value }
-    })
+    const newCategoryName = event.target.value
+    setCategoryName(newCategoryName)
+  }
+
+  const handleEditCategory = (id: number, name: string) => {
+    setEditId(id)
+    setIsEdit(!isEdit)
+    if (!isEdit) {
+      setCategoryName(name)
+    } else {
+      setCategoryName('')
+    }
   }
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    dispatch(addCategory(newCategory))
-    console.log(categories) //1 issue in adding the new category to the categories array
-    setNewCategory({
-      id: 0,
-      name: ''
-    })
+
+    if (isEdit) {
+      const editCategoryData = { id: editId, name: categoryName }
+      dispatch(editCategory(editCategoryData))
+    } else {
+      const newCategory = { id: uuidv4(), name: categoryName }
+      dispatch(addCategory(newCategory))
+    }
+
+    setCategoryName('')
   }
 
   const handleDeleteCategory = (id: number) => {
@@ -54,42 +61,66 @@ const Categories = () => {
   }
 
   return (
-    <div className="container">
+    <div className="admin-container">
       <AdminSidebar />
-      <div className="main-content">
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="id">Category ID:</label>
-          <input type="text" name="id" id="id" value={newCategory.id} onChange={handleChange} />
-          <label htmlFor="name">Category Name:</label>
-          <input
-            type="text"
-            name="name"
-            id="name"
-            value={newCategory.name}
-            onChange={handleChange}
-          />
-          <button type="submit">Create Category</button>
-        </form>
+      <div className="admin-main-content">
+        <div className="admin-categories">
+          <h4 className="title">Create New Category</h4>
+          <form onSubmit={handleSubmit}>
+            {/* <label htmlFor="name">Category Name:</label> */}
+            <input
+              type="text"
+              name="name"
+              id="name"
+              placeholder="Category Name"
+              value={categoryName}
+              onChange={handleChange}
+            />
+            <button type="submit" className="btn">
+              {isEdit ? 'Save' : 'Create'}
+            </button>
+          </form>
 
-        <h2>Categories:</h2>
-        <div className="category">
-          {categories.length > 0 &&
-            categories.map((category: Category) => {
-              const { id, name } = category
-              return (
-                <article key={id}>
-                  <p>id: {id}</p>
-                  <p>name: {name}</p>
-                  <button>Edit</button>
-                  <button
-                    onClick={() => {
-                      handleDeleteCategory(id)
-                    }}>
-                    Delete
-                  </button>
-                </article>
-              )
-            })}
+          <h3 className="title">CATEGORIES</h3>
+
+          <div className="category">
+            <table>
+              <thead>
+                <td>Category ID</td>
+                <td>Category Name</td>
+                <td>Edit Category</td>
+                <td>Delete Category</td>
+              </thead>
+              {categories.length > 0 &&
+                categories.map((category: Category) => {
+                  const { id, name } = category
+                  return (
+                    <tr key={id}>
+                      <td>{id}</td>
+                      <td>{name}</td>
+                      <td>
+                        <button
+                          className="btn"
+                          onClick={() => {
+                            handleEditCategory(id, name)
+                          }}>
+                          Edit
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="btn"
+                          onClick={() => {
+                            handleDeleteCategory(id)
+                          }}>
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
+            </table>
+          </div>
         </div>
       </div>
     </div>

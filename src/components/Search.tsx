@@ -3,13 +3,16 @@ import { ChangeEvent } from 'react'
 type SearchPropsType = {
   searchInput: string
   handleSearch: (event: ChangeEvent<HTMLInputElement>) => void
+  searchLabel: string
 }
 
-const Search = ({ searchInput, handleSearch }: SearchPropsType) => {
+const Search = ({ searchInput, handleSearch, searchLabel }: SearchPropsType) => {
   return (
     <div>
       <form>
-        <input className='search'
+        <label htmlFor="search">{searchLabel}</label>
+        <input
+          className="search"
           type="text"
           name="search"
           id="search"

@@ -65,20 +65,27 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="body">
+    <div className="user-body">
       <div className="login-div">
-        <form className="login-form" onSubmit={handleSubmit}>
+        <form className="user-form" onSubmit={handleSubmit}>
           <label htmlFor="email">Email:</label>
-          <input type="text" name="email" id="email" value={user.email} onChange={handleChange} />
+          <input
+            type="email"
+            name="email"
+            id="email"
+            value={user.email}
+            onChange={handleChange}
+            required
+          />
 
           <label htmlFor="password">Password:</label>
           <input
-            // type="password"
-            type="text"
+            type="password"
             name="password"
             id="password"
             value={user.password}
             onChange={handleChange}
+            required
           />
 
           <button className="btn" type="submit">

@@ -2,9 +2,12 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 import { AppDispatch, RootState } from '../../redux/store'
 import { logout } from '../../redux/slices/users/userSlice'
+import CartIcon from '../userComponents/CartIcon'
+import useUsersState from '../../hooks/useUsersState'
 
 const Navbar = () => {
-  const { isLoggedin, userData } = useSelector((state: RootState) => state.usersReducer)
+  const { isLoggedin, userData } = useUsersState()
+  const { cartItems } = useSelector((state: RootState) => state.cartReducer)
 
   const dispatch: AppDispatch = useDispatch()
 
@@ -32,11 +35,6 @@ const Navbar = () => {
             <li>
               <Link to="/">Home</Link>
             </li>
-            {/* {!isLoggedin && (
-              <li>
-                <Link to="/login">Login</Link>
-              </li>
-            )} */}
 
             {isLoggedin && userRole === 'admin' && (
               <li>
@@ -48,6 +46,12 @@ const Navbar = () => {
                 <Link to="/user/userProfile">User Profile</Link>
               </li>
             )}
+
+            <li>
+              <Link to="/cart">
+                <CartIcon value={cartItems.length > 0 ? cartItems.length : 0} />
+              </Link>
+            </li>
           </ul>
         </div>
 

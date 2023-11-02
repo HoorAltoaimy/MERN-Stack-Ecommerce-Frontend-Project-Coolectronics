@@ -1,13 +1,10 @@
+import { ChangeEvent } from 'react'
 import { useDispatch } from 'react-redux'
-import AdminSidebar from './AdminSidebar'
+
 import { AppDispatch } from '../../redux/store'
-import { ChangeEvent} from 'react'
-import {
-  User,
-  blockUser,
-  deleteUser,
-  searchUser
-} from '../../redux/slices/users/userSlice'
+import { User, blockUser, deleteUser, searchUser } from '../../redux/slices/users/userSlice'
+
+import AdminSidebar from './AdminSidebar'
 import Search from '../Search'
 import useUsersState from '../../hooks/useUsersState'
 
@@ -48,7 +45,11 @@ const Users = () => {
         <h3 className="title">USERS</h3>
 
         <div className="search-div">
-          <Search searchInput={searchInput} handleSearch={handleSearch} />
+          <Search
+            searchInput={searchInput}
+            handleSearch={handleSearch}
+            searchLabel="Search by User ID: "
+          />
         </div>
 
         <table>
@@ -93,7 +94,6 @@ const Users = () => {
               }
             })}
         </table>
-        
       </div>
     </div>
   )

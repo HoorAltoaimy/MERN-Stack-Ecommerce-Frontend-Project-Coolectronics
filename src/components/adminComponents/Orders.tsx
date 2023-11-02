@@ -42,7 +42,7 @@ const Orders = () => {
       <AdminSidebar />
       <div className="admin-main-content">
         <h3 className="title">Orders</h3>
-        <Search searchInput={searchInput} handleSearch={handleSearch} />
+        <Search searchInput={searchInput} handleSearch={handleSearch} searchLabel='Search by order ID: '/>
 
         <table>
           <thead>

@@ -26,7 +26,10 @@ const Products = () => {
     price: 0
   })
   const [isEdit, setIsEdit] = useState(false)
+
   const [editId, setEditId] = useState(0)
+
+  const [validation, setValidation] = useState('')
 
   const dispatch: AppDispatch = useDispatch()
 
@@ -87,12 +90,22 @@ const Products = () => {
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
 
+    if (
+      productInfo.name.length < 2 ||
+      productInfo.description.length < 5 ||
+      productInfo.categories.length < 1 ||
+      productInfo.image.length < 15 ||
+      productInfo.price === 0
+    ) {
+      setValidation('Please fill the form')
+      return
+    }
     if (isEdit) {
       const editProductData = { id: editId, ...productInfo }
       dispatch(editProduct(editProductData))
     } else {
-      const newProductt = { id: uuidv4(), ...productInfo }
-      dispatch(addProduct(newProductt))
+      const newProduct = { id: uuidv4(), ...productInfo }
+      dispatch(addProduct(newProduct))
     }
 
     setProductInfo({
@@ -104,6 +117,8 @@ const Products = () => {
       sizes: [],
       price: 0
     })
+
+    setValidation('')
   }
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
@@ -130,72 +145,98 @@ const Products = () => {
     <div className="admin-container">
       <AdminSidebar />
       <div className="admin-main-content">
-        <form onSubmit={handleSubmit}>
-          <h4 className="title">Create New Product</h4>
-          <label htmlFor="name">Product name:</label>
-          <input
-            type="text"
-            name="name"
-            id="name"
-            value={productInfo.name}
-            onChange={handleChange}
-          />
-          <label htmlFor="image"> Image URL:</label>
-          <input
-            type="text"
-            name="image"
-            id="image"
-            value={productInfo.image}
-            onChange={handleChange}
-          />
-          <label htmlFor="description">Product descripton:</label>
-          <input
-            type="text"
-            name="description"
-            id="description"
-            value={productInfo.description}
-            onChange={handleChange}
-          />
-          <label htmlFor="categories">Product categories:</label>
-          <input
-            type="text"
-            name="categories"
-            id="categories"
-            value={productInfo.categories.join(',')}
-            onChange={handleChange}
-          />
-          <label htmlFor="variants">Product variants:</label>
-          <input
-            type="text"
-            name="variants"
-            id="variants"
-            value={productInfo.variants.join(',')}
-            onChange={handleChange}
-          />
-          <label htmlFor="sizes">Product sizes:</label>
-          <input
-            type="text"
-            name="sizes"
-            id="sizes"
-            value={productInfo.sizes.join(',')}
-            onChange={handleChange}
-          />
-          <label htmlFor="price">Product price:</label>
-          <input
-            type="text"
-            name="price"
-            id="price"
-            value={productInfo.price}
-            onChange={handleChange}
-          />
+        <h4 className="title">Create New Product</h4>
+        <div className="admin-forms">
+          <form onSubmit={handleSubmit}>
+            <div className="admin-form-line">
+              <label htmlFor="name">Product name:</label>
+              <input
+                type="text"
+                name="name"
+                id="name"
+                value={productInfo.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="admin-form-line">
+              <label htmlFor="image"> Image URL:</label>
+              <input
+                type="text"
+                name="image"
+                id="image"
+                value={productInfo.image}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="admin-form-line">
+              <label htmlFor="description">Product descripton:</label>
+              <input
+                type="text"
+                name="description"
+                id="description"
+                value={productInfo.description}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="admin-form-line">
+              <label htmlFor="categories">Product categories:</label>
+              <input
+                type="text"
+                name="categories"
+                id="categories"
+                value={productInfo.categories.join(',')}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="admin-form-line">
+              <label htmlFor="variants">Product variants:</label>
+              <input
+                type="text"
+                name="variants"
+                id="variants"
+                value={productInfo.variants.join(',')}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="admin-form-line">
+              <label htmlFor="sizes">Product sizes:</label>
+              <input
+                type="text"
+                name="sizes"
+                id="sizes"
+                value={productInfo.sizes.join(',')}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="admin-form-line">
+              <label htmlFor="price">Product price:</label>
+              <input
+                type="text"
+                name="price"
+                id="price"
+                value={productInfo.price}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-          <button type="submit" className="btn">
-            {isEdit ? 'Save' : 'Create'}
-          </button>
-        </form>
+            <p className="form-validation">{validation}</p>
+            <button type="submit" className="btn">
+              {isEdit ? 'Save' : 'Create'}
+            </button>
+          </form>
+        </div>
 
         <h3 className="title">PRODUCTS</h3>
-        <Search searchInput={searchInput} handleSearch={handleSearch} />
+        <Search
+          searchInput={searchInput}
+          handleSearch={handleSearch}
+          searchLabel="Search product by name: "
+        />
         <div className="products-container">
           {searchResult.length > 0 &&
             searchResult.map((product: Product) => {

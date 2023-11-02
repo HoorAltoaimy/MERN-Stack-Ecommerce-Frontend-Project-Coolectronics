@@ -30,16 +30,16 @@ const ProductDetails = () => {
 
   const getCategoryName = (id: number) => {
     const categoryFound = categories.find((category) => category.id === id)
-    
-    return categoryFound? categoryFound.name + '. ' : 'No category assigned' 
+
+    return categoryFound ? categoryFound.name + '. ' : 'No category assigned'
   }
 
   return (
-    <div className="body">
+    <div className="product-detailes-body">
       <div className="product-detailes-div">
         <div className="back">
           <Link to="/">
-            <FaArrowLeft />{' '}
+            <FaArrowLeft />
           </Link>
         </div>
 
@@ -57,8 +57,10 @@ const ProductDetails = () => {
                 {singleProduct.categories &&
                   singleProduct.categories.map((categoryId) => getCategoryName(categoryId))}
               </p>
-              {singleProduct.variants.length > 0 && (<p>Variants: {singleProduct.variants && singleProduct.variants.join(', ')}</p>)}
-              {singleProduct.sizes.length > 0 && (
+              {singleProduct.variants && singleProduct.variants.length > 0 && (
+                <p>Variants: {singleProduct.variants && singleProduct.variants.join(', ')}</p>
+              )}
+              {singleProduct.sizes && singleProduct.sizes.length > 0 && (
                 <p>Sizes: {singleProduct.sizes && singleProduct.sizes.join(', ')}</p>
               )}
               <p>Price: {singleProduct.price} SAR</p>

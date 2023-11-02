@@ -15,8 +15,12 @@ const Categories = () => {
   const { categories, isLoading, error } = useCategoriesState()
 
   const [categoryName, setCategoryName] = useState('')
+
   const [isEdit, setIsEdit] = useState(false)
+
   const [editId, setEditId] = useState(0)
+
+  const [validation, setValidation] = useState('')
 
   const dispatch: AppDispatch = useDispatch()
 
@@ -28,6 +32,7 @@ const Categories = () => {
   const handleEditCategory = (id: number, name: string) => {
     setEditId(id)
     setIsEdit(!isEdit)
+
     if (!isEdit) {
       setCategoryName(name)
     } else {
@@ -38,6 +43,10 @@ const Categories = () => {
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
 
+    if (categoryName.length < 2) {
+      setValidation('Category name should be at least 2 characters')
+      return
+    }
     if (isEdit) {
       const editCategoryData = { id: editId, name: categoryName }
       dispatch(editCategory(editCategoryData))
@@ -47,6 +56,7 @@ const Categories = () => {
     }
 
     setCategoryName('')
+    setValidation('')
   }
 
   const handleDeleteCategory = (id: number) => {
@@ -66,20 +76,25 @@ const Categories = () => {
       <div className="admin-main-content">
         <div className="admin-categories">
           <h4 className="title">Create New Category</h4>
-          <form onSubmit={handleSubmit}>
-            {/* <label htmlFor="name">Category Name:</label> */}
-            <input
-              type="text"
-              name="name"
-              id="name"
-              placeholder="Category Name"
-              value={categoryName}
-              onChange={handleChange}
-            />
-            <button type="submit" className="btn">
-              {isEdit ? 'Save' : 'Create'}
-            </button>
-          </form>
+          <div className="admin-forms">
+            <form onSubmit={handleSubmit}>
+              <div className="admin-form-line">
+                <label htmlFor="categoryName">Category Name:</label>
+                <input
+                  type="text"
+                  name="categoryName"
+                  id="categoryName"
+                  value={categoryName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <p className="form-validation">{validation}</p>
+              <button type="submit" className="btn">
+                {isEdit ? 'Save' : 'Create'}
+              </button>
+            </form>
+          </div>
 
           <h3 className="title">CATEGORIES</h3>
 

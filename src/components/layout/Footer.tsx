@@ -1,12 +1,10 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
-
-import { FaXTwitter, FaInstagram, FaTiktok } from 'react-icons/fa6'
+import { FaInstagram, FaTiktok, FaXTwitter } from 'react-icons/fa6'
 import { MdOutlineMail } from 'react-icons/md'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.min.css'
 
 const Footer = () => {
-
   const [email, setEmail] = useState('')
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {

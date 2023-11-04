@@ -1,20 +1,21 @@
-import { useDispatch, useSelector } from 'react-redux'
-import AdminSidebar from './AdminSidebar'
-import { AppDispatch, RootState } from '../../redux/store'
 import { ChangeEvent, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
 import { Order, deleteOrder, fetchOrders, searchOrder } from '../../redux/slices/orders/ordersSlice'
-import Search from '../Search'
+import { AppDispatch, RootState } from '../../redux/store'
+
+import Search from '../products/Search'
+import AdminSidebar from './AdminSidebar'
 
 const Orders = () => {
-
   const { orders, isLoading, error, searchInput } = useSelector(
     (state: RootState) => state.ordersReducer
   )
-  
+
   const dispatch: AppDispatch = useDispatch()
 
   useEffect(() => {
-    dispatch(fetchOrders());
+    dispatch(fetchOrders())
   }, [])
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
@@ -25,16 +26,16 @@ const Orders = () => {
   const searchResult = searchInput
     ? orders.filter((order) => order.id === Number(searchInput))
     : orders
-  
+
   const handleDeleteOrder = (id: number) => {
     dispatch(deleteOrder(id))
   }
-  
+
   if (isLoading) {
     return <p>Loading...</p>
   }
   if (error) {
-    return <p>{ error}</p>
+    return <p>{error}</p>
   }
 
   return (
@@ -42,7 +43,11 @@ const Orders = () => {
       <AdminSidebar />
       <div className="admin-main-content">
         <h3 className="title">Orders</h3>
-        <Search searchInput={searchInput} handleSearch={handleSearch} searchLabel='Search by order ID: '/>
+        <Search
+          searchInput={searchInput}
+          handleSearch={handleSearch}
+          searchLabel="Search by order ID: "
+        />
 
         <table>
           <thead>

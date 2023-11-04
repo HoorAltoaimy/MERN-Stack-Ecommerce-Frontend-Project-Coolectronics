@@ -1,15 +1,18 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { AppDispatch } from '../redux/store'
-import { login } from '../redux/slices/users/userSlice'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.min.css'
-import useUsersState from '../hooks/useUsersState'
+
+import useUsersState from '../../hooks/useUsersState'
+import { login } from '../../redux/slices/users/userSlice'
+import { AppDispatch } from '../../redux/store'
 
 const LoginPage = () => {
   const { users } = useUsersState()
+
   const navigate = useNavigate()
+
   const [user, setUser] = useState({ email: '', password: '' })
 
   const dispatch: AppDispatch = useDispatch()
@@ -21,7 +24,6 @@ const LoginPage = () => {
     })
   }
 
-  console.log(users)
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
     try {

@@ -1,26 +1,24 @@
 import { ChangeEvent, useState } from 'react'
+import { FaArrowLeft, FaArrowRight } from 'react-icons/fa'
 import { useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.min.css'
-import { FaArrowLeft, FaArrowRight } from 'react-icons/fa'
 
-import { AppDispatch } from '../redux/store'
-import { Product, searchProduct } from '../redux/slices/products/productsSlice'
-import { addToCart } from '../redux/slices/cart/cartSlice'
+import { addToCart } from '../../redux/slices/cart/cartSlice'
+import { Product, searchProduct } from '../../redux/slices/products/productsSlice'
+import { AppDispatch } from '../../redux/store'
 
-import SortProducts from '../components/SortProducts'
-import Search from '../components/Search'
-import useProductState from '../hooks/useProductsState'
-import useCategoriesState from '../hooks/useCategoriesState'
-import { prices } from '../prices'
+import Search from '../../components/products/Search'
+import SortProducts from '../../components/products/SortProducts'
+import useCategoriesState from '../../hooks/useCategoriesState'
+import useProductState from '../../hooks/useProductsState'
+import { prices } from '../../priceData/prices'
 
 const Home = () => {
   const { products, isLoading, error, searchInput } = useProductState()
 
   const { categories } = useCategoriesState()
-
-  const dispatch: AppDispatch = useDispatch()
 
   const [selectedCategory, setSelectedCategory] = useState<number[]>([])
 
@@ -30,11 +28,14 @@ const Home = () => {
 
   const [itemsPerPage] = useState(3)
 
+  const dispatch: AppDispatch = useDispatch()
+
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     const searchItem = event.target.value
     dispatch(searchProduct(searchItem))
   }
 
+  //Filter by category or price functionality
   const handleSelectedCategory = (categoryId: number) => {
     if (selectedCategory.includes(categoryId)) {
       const filteredCategories = selectedCategory.filter((category) => category !== categoryId)
@@ -70,6 +71,7 @@ const Home = () => {
     return categoryMatch && priceMatch && searchResult
   })
 
+  //Pagination
   const lastItemIndex = currentPage * itemsPerPage
   const firstItemIndex = lastItemIndex - itemsPerPage
   const currentItems = filteredProducts.slice(firstItemIndex, lastItemIndex)
@@ -99,7 +101,6 @@ const Home = () => {
       </button>
     )
   }
-
 
   const handleAddToCart = (product: Product) => {
     toast.clearWaitingQueue()

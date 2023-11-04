@@ -1,22 +1,21 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
-import Navbar from '../components/layout/Navbar'
-import Footer from '../components/layout/Footer'
-import Home from '../pages/Home'
-import ProductDetails from '../pages/ProductDetails'
-import AdminDashboard from '../pages/AdminDashboard'
 import Categories from '../components/adminComponents/Categories'
+import Orders from '../components/adminComponents/Orders'
 import Products from '../components/adminComponents/Products'
 import Users from '../components/adminComponents/Users'
-import Orders from '../components/adminComponents/Orders'
-// import Cart from '../components/userComponents/Cart'
-import Error from '../pages/Error'
-import LoginPage from '../pages/LoginPage'
-import AdminProtectedRoutes from './AdminProtectedRout'
-import Register from '../pages/Register'
-import UserProfile from '../pages/UserProfile'
-import UserProtectedRoutes from './UserProtectedRoutes'
+import Footer from '../components/layout/Footer'
+import Navbar from '../components/layout/Navbar'
 import Cart from '../components/userComponents/Cart'
+import AdminDashboard from '../pages/admin/AdminDashboard'
+import Error from '../pages/Error'
+import Home from '../pages/home/Home'
+import LoginPage from '../pages/login/LoginPage'
+import ProductDetails from '../pages/home/ProductDetails'
+import Register from '../pages/login/Register'
+import UserProfile from '../pages/user/UserProfile'
+import AdminProtectedRoutes from './AdminProtectedRout'
+import UserProtectedRoutes from './UserProtectedRoutes'
 
 const Index = () => {
   return (
@@ -40,7 +39,6 @@ const Index = () => {
 
         <Route path="/user" element={<UserProtectedRoutes />}>
           <Route path="userProfile" element={<UserProfile />} />
-          {/* <Route path="cart" element={<Cart />} />  */}
         </Route>
 
         <Route path="/*" element={<Error />} />

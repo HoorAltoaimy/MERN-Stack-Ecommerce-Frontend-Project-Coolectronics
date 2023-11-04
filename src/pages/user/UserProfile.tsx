@@ -1,16 +1,14 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
-
-import { AppDispatch } from '../redux/store'
 import { useDispatch } from 'react-redux'
-import { editProfile } from '../redux/slices/users/userSlice'
-import useUsersState from '../hooks/useUsersState'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.min.css'
 
+import useUsersState from '../../hooks/useUsersState'
+import { editProfile } from '../../redux/slices/users/userSlice'
+import { AppDispatch } from '../../redux/store'
+
 const UserProfile = () => {
   const { userData } = useUsersState()
-
-  const dispatch: AppDispatch = useDispatch()
 
   const [isFormOpen, setIsFormOpen] = useState(false)
 
@@ -20,6 +18,8 @@ const UserProfile = () => {
   })
 
   const [validation, setValidation] = useState('')
+
+  const dispatch: AppDispatch = useDispatch()
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target

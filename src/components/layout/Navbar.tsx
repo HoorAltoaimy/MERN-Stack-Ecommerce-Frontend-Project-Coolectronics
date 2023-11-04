@@ -1,13 +1,17 @@
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { AppDispatch, RootState } from '../../redux/store'
-import { logout } from '../../redux/slices/users/userSlice'
-import CartIcon from '../userComponents/CartIcon'
+
 import useUsersState from '../../hooks/useUsersState'
+import { logout } from '../../redux/slices/users/userSlice'
+import { AppDispatch } from '../../redux/store'
+
+import CartIcon from '../userComponents/CartIcon'
+import useCartState from '../../hooks/useCartState'
 
 const Navbar = () => {
   const { isLoggedin, userData } = useUsersState()
-  const { cartItems } = useSelector((state: RootState) => state.cartReducer)
+
+  const { cartItems } = useCartState()
 
   const dispatch: AppDispatch = useDispatch()
 

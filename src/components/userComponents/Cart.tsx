@@ -1,13 +1,15 @@
-import { useDispatch, useSelector } from "react-redux"
-import { AppDispatch, RootState } from "../../redux/store"
-import { FaTrash, FaPaypal } from 'react-icons/fa'
-import { clearCart, removeFromCart } from "../../redux/slices/cart/cartSlice"
-import { ToastContainer, toast } from "react-toastify"
-import 'react-toastify/dist/ReactToastify.min.css'
+import { FaPaypal, FaTrash } from 'react-icons/fa'
 import { SiApplepay } from 'react-icons/si'
+import { useDispatch } from "react-redux"
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.min.css'
+
+import useCartState from '../../hooks/useCartState'
+import { clearCart, removeFromCart } from "../../redux/slices/cart/cartSlice"
+import { AppDispatch } from "../../redux/store"
 
 const Cart = () => {
-  const { cartItems } = useSelector((state: RootState) => state.cartReducer)
+  const { cartItems } = useCartState()
 
   const dispatch: AppDispatch = useDispatch()
   

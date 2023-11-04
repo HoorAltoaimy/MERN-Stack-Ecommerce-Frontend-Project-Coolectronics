@@ -1,12 +1,12 @@
 import { ChangeEvent } from 'react'
 import { useDispatch } from 'react-redux'
 
-import { AppDispatch } from '../../redux/store'
-import { User, blockUser, deleteUser, searchUser } from '../../redux/slices/users/userSlice'
-
-import AdminSidebar from './AdminSidebar'
-import Search from '../Search'
 import useUsersState from '../../hooks/useUsersState'
+import { User, blockUser, deleteUser, searchUser } from '../../redux/slices/users/userSlice'
+import { AppDispatch } from '../../redux/store'
+
+import Search from '../products/Search'
+import AdminSidebar from './AdminSidebar'
 
 const Users = () => {
   const { users, isLoading, error, searchInput } = useUsersState()

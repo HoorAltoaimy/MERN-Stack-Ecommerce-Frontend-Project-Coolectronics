@@ -1,19 +1,10 @@
-import { Link } from 'react-router-dom'
 import { FaUser } from 'react-icons/fa'
-// import { AppDispatch } from '../../redux/store'
-// import { useDispatch } from 'react-redux'
-// import { logout } from '../../redux/slices/users/userSlice'
+import { Link } from 'react-router-dom'
+
 import useUserState from '../../hooks/useUsersState'
 
 const AdminSidebar = () => {
   const { userData } = useUserState()
-  // const dispatch: AppDispatch = useDispatch()
-  // const navigate = useNavigate()
-
-  // const handleClick = () => {
-  //   dispatch(logout())
-  //   navigate('/')
-  // }
 
   return (
     <aside className="sidebar">

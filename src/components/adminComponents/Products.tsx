@@ -1,17 +1,19 @@
-import { useDispatch } from 'react-redux'
-import AdminSidebar from './AdminSidebar'
-import { AppDispatch } from '../../redux/store'
 import { ChangeEvent, FormEvent, useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { v4 as uuidv4 } from 'uuid'
+
+import useProductsState from '../../hooks/useProductsState'
 import {
   Product,
   addProduct,
-  searchProduct,
   deleteProduct,
-  editProduct
+  editProduct,
+  searchProduct
 } from '../../redux/slices/products/productsSlice'
-import Search from '../Search'
-import { v4 as uuidv4 } from 'uuid'
-import useProductsState from '../../hooks/useProductsState'
+import { AppDispatch } from '../../redux/store'
+
+import Search from '../products/Search'
+import AdminSidebar from './AdminSidebar'
 
 const Products = () => {
   const { products, isLoading, error, searchInput } = useProductsState()

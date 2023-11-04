@@ -22,7 +22,6 @@ const initialState: CategoriesState = {
   categories: [],
   error: null,
   isLoading: false,
-  // category: {} as Category
   category: categoryData.category
 }
 

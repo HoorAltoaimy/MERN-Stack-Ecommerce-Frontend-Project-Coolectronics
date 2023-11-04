@@ -1,7 +1,9 @@
 import { useSelector } from 'react-redux'
-import { RootState } from '../redux/store'
 import { Outlet } from 'react-router-dom'
-import LoginPage from '../pages/LoginPage'
+
+import { RootState } from '../redux/store'
+
+import LoginPage from '../pages/login/LoginPage'
 
 const UserProtectedRoutes = () => {
   const { isLoggedin, userData } = useSelector((state: RootState) => state.usersReducer)

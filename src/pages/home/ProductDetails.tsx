@@ -1,19 +1,21 @@
-import { useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../redux/store'
-import { Link, useParams } from 'react-router-dom'
 import { useEffect } from 'react'
-import { fetchProducts, showProductDetailes } from '../redux/slices/products/productsSlice'
 import { FaArrowLeft } from 'react-icons/fa'
+import { useDispatch } from 'react-redux'
+import { Link, useParams } from 'react-router-dom'
+
+import useCategoriesState from '../../hooks/useCategoriesState'
+import useProductsState from '../../hooks/useProductsState'
+import { fetchProducts, showProductDetailes } from '../../redux/slices/products/productsSlice'
+import { AppDispatch } from '../../redux/store'
 
 const ProductDetails = () => {
-  const { singleProduct, isLoading, error } = useSelector(
-    (state: RootState) => state.productsReducer
-  )
-  const { categories } = useSelector((state: RootState) => state.categoriesReducer)
+  const { singleProduct, isLoading, error } = useProductsState()
 
-  const dispatch: AppDispatch = useDispatch()
+  const { categories } = useCategoriesState()
 
   const { idNumber } = useParams() //getting the product id from the path
+
+  const dispatch: AppDispatch = useDispatch()
 
   useEffect(() => {
     if (idNumber) {
@@ -21,17 +23,17 @@ const ProductDetails = () => {
     }
   }, [dispatch, idNumber])
 
+  const getCategoryName = (id: number) => {
+    const categoryFound = categories.find((category) => category.id === id)
+
+    return categoryFound ? categoryFound.name + '. ' : 'No category assigned'
+  }
+
   if (isLoading) {
     return <p>Data is loading</p>
   }
   if (error) {
     return <p>{error}</p>
-  }
-
-  const getCategoryName = (id: number) => {
-    const categoryFound = categories.find((category) => category.id === id)
-
-    return categoryFound ? categoryFound.name + '. ' : 'No category assigned'
   }
 
   return (
@@ -44,7 +46,6 @@ const ProductDetails = () => {
         </div>
 
         {singleProduct && (
-          // <article>
           <>
             <div className="product-img">
               <img src={singleProduct.image} alt={singleProduct.name} width={300} height={300} />
@@ -68,7 +69,6 @@ const ProductDetails = () => {
                 <button className="btn">Add to cart</button>
               </div>
             </div>
-            {/* </article> */}
           </>
         )}
       </div>

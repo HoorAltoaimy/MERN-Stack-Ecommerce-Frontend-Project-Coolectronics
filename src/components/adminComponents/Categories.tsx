@@ -1,15 +1,17 @@
+import { ChangeEvent, FormEvent, useState } from 'react'
 import { useDispatch } from 'react-redux'
-import AdminSidebar from './AdminSidebar'
-import { AppDispatch } from '../../redux/store'
+import { v4 as uuidv4 } from 'uuid'
+
+import useCategoriesState from '../../hooks/useCategoriesState'
 import {
   Category,
   addCategory,
   deleteCategory,
   editCategory
 } from '../../redux/slices/categories/categoriesSlice'
-import { ChangeEvent, FormEvent, useState } from 'react'
-import useCategoriesState from '../../hooks/useCategoriesState'
-import { v4 as uuidv4 } from 'uuid'
+import { AppDispatch } from '../../redux/store'
+
+import AdminSidebar from './AdminSidebar'
 
 const Categories = () => {
   const { categories, isLoading, error } = useCategoriesState()

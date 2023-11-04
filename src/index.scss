@@ -352,15 +352,6 @@ mark {
     justify-content: center;
 }
 .product-detailes-div {
-    // display: grid;
-    // grid-template-columns: auto auto auto;
-    // justify-content: space-around;
-    // margin: 1rem;
-    // margin-top: 11rem;
-    // width: 100%;
-    // box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-    // border-radius: 10px;
-
     background-color: white;
     display: grid;
     grid-template-columns: auto auto auto;
@@ -535,7 +526,6 @@ table {
     thead {
         background-color: #282828;
         color: whitesmoke;
-        /* border-radius: 10px; ???????????????*/
     }
 
     td {

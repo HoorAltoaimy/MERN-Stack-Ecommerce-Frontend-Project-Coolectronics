@@ -1,16 +1,16 @@
-import { useDispatch } from 'react-redux'
-import AdminSidebar from '../components/adminComponents/AdminSidebar'
-import { AppDispatch } from '../redux/store'
-import useUserState from './../hooks/useUsersState'
 import { ChangeEvent, FormEvent, useState } from 'react'
-import { editProfile } from '../redux/slices/users/userSlice'
+import { useDispatch } from 'react-redux'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.min.css'
 
+import useUserState from '../../hooks/useUsersState'
+import { editProfile } from '../../redux/slices/users/userSlice'
+import { AppDispatch } from '../../redux/store'
+
+import AdminSidebar from '../../components/adminComponents/AdminSidebar'
+
 const AdminDashboard = () => {
   const { userData } = useUserState()
-
-  const dispatch: AppDispatch = useDispatch()
 
   const [isFormOpen, setIsFormOpen] = useState(false)
 
@@ -21,6 +21,9 @@ const AdminDashboard = () => {
 
   const [validation, setValidation] = useState('')
 
+  const dispatch: AppDispatch = useDispatch()
+
+  //Edit admin profile
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
     setUser((prevUser) => {
@@ -48,7 +51,7 @@ const AdminDashboard = () => {
   const handleFormOpen = () => {
     setIsFormOpen(!isFormOpen)
   }
-  
+
   return (
     <div className="admin-container">
       <AdminSidebar />
@@ -91,7 +94,6 @@ const AdminDashboard = () => {
             </form>
           )}
         </div>
-
       </div>
     </div>
   )

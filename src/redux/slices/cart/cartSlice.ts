@@ -8,7 +8,6 @@ type cartState = {
 }
 
 const initialState: cartState = {
-  // cartItems: []
   cartItems: data
 }
 

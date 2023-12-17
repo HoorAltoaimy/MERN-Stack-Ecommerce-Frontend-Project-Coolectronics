@@ -2,8 +2,7 @@ import { ChangeEvent, useState } from 'react'
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa'
 import { useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { ToastContainer, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.min.css'
+import { toast } from 'react-toastify'
 
 import { addToCart } from '../../redux/slices/cart/cartSlice'
 import { Product, searchProduct } from '../../redux/slices/products/productsSlice'
@@ -13,7 +12,7 @@ import Search from '../../components/products/Search'
 import SortProducts from '../../components/products/SortProducts'
 import useCategoriesState from '../../hooks/useCategoriesState'
 import useProductState from '../../hooks/useProductsState'
-import { prices } from '../../priceData/prices'
+import { prices } from '../../../public/mock/priceData/prices'
 
 const Home = () => {
   const { products, isLoading, error, searchInput } = useProductState()
@@ -103,7 +102,6 @@ const Home = () => {
   }
 
   const handleAddToCart = (product: Product) => {
-    toast.clearWaitingQueue()
     toast.success('Added to cart successfully')
     dispatch(addToCart(product))
   }
@@ -210,7 +208,7 @@ const Home = () => {
                     }}>
                     Add to cart
                   </button>
-                  <ToastContainer limit={1} autoClose={3000} position={toast.POSITION.TOP_CENTER} />
+
                 </div>
               </article>
             )

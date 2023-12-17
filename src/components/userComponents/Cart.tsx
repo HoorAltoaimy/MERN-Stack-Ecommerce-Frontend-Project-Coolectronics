@@ -1,27 +1,33 @@
+import { useState } from 'react'
 import { FaPaypal, FaTrash } from 'react-icons/fa'
 import { SiApplepay } from 'react-icons/si'
-import { useDispatch } from "react-redux"
-import { ToastContainer, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.min.css'
+import { useDispatch } from 'react-redux'
+import { toast } from 'react-toastify'
 
 import useCartState from '../../hooks/useCartState'
-import { clearCart, removeFromCart } from "../../redux/slices/cart/cartSlice"
-import { AppDispatch } from "../../redux/store"
+import { clearCart, removeFromCart } from '../../redux/slices/cart/cartSlice'
+import { AppDispatch } from '../../redux/store'
 
 const Cart = () => {
   const { cartItems } = useCartState()
 
+  const [toastCount, setToastCount] = useState(0)
+
   const dispatch: AppDispatch = useDispatch()
-  
+
   const handleRemoveFromCart = (id: number) => {
-    toast.clearWaitingQueue()
-    toast.success('Item removed successfully')
+    if (toastCount < 1) {
+      toast.success('Item removed successfully')
+      setToastCount(toastCount + 1)
+    }
     dispatch(removeFromCart(id))
   }
 
   const handleClearCart = () => {
-    toast.clearWaitingQueue()
-    toast.success('Items removed successfully')
+    if (toastCount < 1) {
+      toast.success('Items removed successfully')
+      setToastCount(toastCount + 1)
+    }
     dispatch(clearCart())
   }
 
@@ -71,11 +77,6 @@ const Cart = () => {
                           }}>
                           <FaTrash size={20} />
                         </button>
-                        <ToastContainer
-                          autoClose={3000}
-                          position={toast.POSITION.TOP_CENTER}
-                          limit={1}
-                        />
                       </div>
                     </article>
                   )

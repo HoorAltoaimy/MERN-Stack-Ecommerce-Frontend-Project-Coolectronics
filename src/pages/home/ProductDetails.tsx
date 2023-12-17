@@ -2,10 +2,12 @@ import { useEffect } from 'react'
 import { FaArrowLeft } from 'react-icons/fa'
 import { useDispatch } from 'react-redux'
 import { Link, useParams } from 'react-router-dom'
+import { toast } from 'react-toastify'
 
 import useCategoriesState from '../../hooks/useCategoriesState'
 import useProductsState from '../../hooks/useProductsState'
-import { fetchProducts, showProductDetailes } from '../../redux/slices/products/productsSlice'
+import { addToCart } from '../../redux/slices/cart/cartSlice'
+import { Product, fetchProducts, showProductDetailes } from '../../redux/slices/products/productsSlice'
 import { AppDispatch } from '../../redux/store'
 
 const ProductDetails = () => {
@@ -27,6 +29,11 @@ const ProductDetails = () => {
     const categoryFound = categories.find((category) => category.id === id)
 
     return categoryFound ? categoryFound.name + '. ' : 'No category assigned'
+  }
+
+  const handleAddToCart = (product: Product) => {
+   toast.success('Added to cart successfully')
+    dispatch(addToCart(product))
   }
 
   if (isLoading) {
@@ -66,7 +73,14 @@ const ProductDetails = () => {
               )}
               <p>Price: {singleProduct.price} SAR</p>
               <div className="div-btn">
-                <button className="btn">Add to cart</button>
+                <button
+                  className="btn"
+                  onClick={() => {
+                    handleAddToCart(singleProduct)
+                  }}>
+                  Add to cart
+                </button>
+
               </div>
             </div>
           </>

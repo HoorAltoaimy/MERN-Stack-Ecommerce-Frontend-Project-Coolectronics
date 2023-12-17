@@ -1,17 +1,24 @@
-import { ChangeEvent } from 'react'
+import { ChangeEvent, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
+import { toast } from 'react-toastify'
 
 import useUsersState from '../../hooks/useUsersState'
-import { User, blockUser, deleteUser, searchUser } from '../../redux/slices/users/userSlice'
+import { User, banUser, deleteUser, fetchUsers, searchUser, unbanUser } from '../../redux/slices/users/userSlice'
 import { AppDispatch } from '../../redux/store'
 
 import Search from '../products/Search'
 import AdminSidebar from './AdminSidebar'
+import axios from 'axios'
 
 const Users = () => {
   const { users, isLoading, error, searchInput } = useUsersState()
 
   const dispatch: AppDispatch = useDispatch()
+
+  useEffect(() => {
+    dispatch(fetchUsers())
+  }, [dispatch])
+  
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     const searchItem = event.target.value
@@ -19,23 +26,39 @@ const Users = () => {
   }
 
   const searchResult = searchInput
-    ? users.filter((user) => user.firstName.toLowerCase().includes(searchInput.toLowerCase()))
+    ? users.filter((user) => user.username.toLowerCase().includes(searchInput.toLowerCase()))
     : users
 
-  if (isLoading) {
-    return <p>Loading...</p>
-  }
-  if (error) {
-    return <p>{error}</p>
+  //! handle grant role here
+
+  const handleDeleteUser = async (id: string) => {
+    try {
+      dispatch(deleteUser(id))
+        toast.success('User deleted successfully')
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log(error?.response?.data.message);
+      }
+    }
   }
 
-  const handleDeleteUser = (id: number) => {
-    dispatch(deleteUser(id))
+  const handleBanStatus = (id: string, isBanned: boolean) => {
+    try {
+      isBanned ?  dispatch(unbanUser(id)) :  dispatch(banUser(id))
+      toast.success('User ban status updated successfully')
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(error?.response?.data.message)
+      }
+    }
   }
 
-  const handleBlockUser = (id: number) => {
-    dispatch(blockUser(id))
-  }
+    // if (isLoading) {
+    //   return <p>Loading...</p>
+    // }
+    // if (error) {
+    //   return <p>{error}</p>
+    // }
 
   return (
     <div className="admin-container">
@@ -55,6 +78,7 @@ const Users = () => {
         <table>
           <thead>
             <td>ID</td>
+            <td>Image</td>
             <td>Name</td>
             <td>Email</td>
             <td>Delete User</td>
@@ -62,20 +86,20 @@ const Users = () => {
           </thead>
           {searchResult.length > 0 &&
             searchResult.map((user: User) => {
-              const { id, firstName, lastName, email, role, isBlocked } = user
-              if (role !== 'admin') {
+              const { _id, username, email, image, isAdmin, isBanned } = user
+              if (!isAdmin) {
                 return (
-                  <tr key={id} className="users-card">
-                    <td>{id}</td>
-                    <td>
-                      {firstName} {lastName}
-                    </td>
+                  <tr key={_id} className="users-card">
+                    <td>{_id}</td>
+                    <td>{<img src={`http://localhost:5050/${image}`} alt={username} width={50} height={50} />}</td>
+                    <td>{username}</td>
                     <td>{email}</td>
+                    <td>{isBanned}</td>
                     <td>
                       <button
                         className="btn"
                         onClick={() => {
-                          handleDeleteUser(id)
+                          handleDeleteUser(_id)
                         }}>
                         Delete
                       </button>
@@ -84,9 +108,9 @@ const Users = () => {
                       <button
                         className="btn"
                         onClick={() => {
-                          handleBlockUser(id)
+                          handleBanStatus(_id, isBanned) 
                         }}>
-                        {isBlocked ? 'Unblock' : 'Block'}
+                        {isBanned ? 'Unban' : 'Ban'}
                       </button>
                     </td>
                   </tr>

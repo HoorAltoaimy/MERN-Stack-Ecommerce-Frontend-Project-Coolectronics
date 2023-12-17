@@ -1,7 +1,6 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { ToastContainer, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.min.css'
+import { toast } from 'react-toastify'
 
 import useUserState from '../../hooks/useUsersState'
 import { editProfile } from '../../redux/slices/users/userSlice'
@@ -90,7 +89,7 @@ const AdminDashboard = () => {
               <button className="btn" type="submit">
                 Save
               </button>
-              <ToastContainer autoClose={3000} position={toast.POSITION.TOP_CENTER} />
+
             </form>
           )}
         </div>

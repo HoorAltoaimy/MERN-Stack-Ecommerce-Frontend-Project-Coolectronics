@@ -1,8 +1,7 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { ToastContainer, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.min.css'
+import { toast } from 'react-toastify'
 
 import useUsersState from '../../hooks/useUsersState'
 import { login } from '../../redux/slices/users/userSlice'
@@ -93,7 +92,6 @@ const LoginPage = () => {
           <button className="btn" type="submit">
             Login
           </button>
-          <ToastContainer autoClose={3000} position={toast.POSITION.TOP_CENTER} />
 
           <p>
             Do not have an account? <Link to="/register">Register here</Link>

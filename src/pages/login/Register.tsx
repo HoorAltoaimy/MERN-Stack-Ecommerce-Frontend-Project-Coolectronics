@@ -1,46 +1,58 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.min.css'
-import { v4 as uuidv4 } from 'uuid'
+//import { useDispatch } from 'react-redux'
+//import { useNavigate } from 'react-router-dom'
+//import { toast } from 'react-toastify'
+//import { v4 as uuidv4 } from 'uuid'
+import axios from 'axios'
+import { createUser } from '../../services/userServices'
 
-import { addUser, fetchUsers } from '../../redux/slices/users/userSlice'
-import { AppDispatch } from '../../redux/store'
+//import { AppDispatch } from '../../redux/store'
 
 const Register = () => {
   const [user, setUser] = useState({
-    firstName: '',
-    lastName: '',
+    username: '',
     email: '',
     password: '',
-    role: 'user',
-    isBlocked: false
+    image: '',
+    phone: '',
+    address: ''
   })
 
   const [validation, setValidation] = useState('')
 
-  const dispatch: AppDispatch = useDispatch()
+  //const dispatch: AppDispatch = useDispatch()
 
-  const navigate = useNavigate()
+  //const navigate = useNavigate()
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target
-    setUser((prevUsers) => {
-      return { ...prevUsers, [name]: value }
-    })
+  const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (event.target.type === 'file') {
+      const fileInput = (event.target as HTMLInputElement) || ''
+      const [ name ] = event.target.name
+      setUser((prevUsers) => {
+        return { ...prevUsers, [name]: fileInput.files?.[0].name }
+      })
+    }
+    else {
+      const { name, value } = event.target
+      setUser((prevUsers) => {
+        return { ...prevUsers, [name]: value }
+      })
+    }
   }
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
-    const newUser = { id: uuidv4(), ...user }
 
-    if (user.firstName.length < 2) {
-      setValidation('First name should be at least 2 characters')
-      return
-    }
-    if (user.lastName.length < 2) {
-      setValidation('Last name should be at least 2 characters')
+    const formData = new FormData()
+    formData.append('username', user.username)
+    formData.append('email', user.email)
+    formData.append('password', user.password)
+    formData.append('image', user.image)
+    formData.append('phone', user.phone)
+    formData.append('address', user.address)
+
+    if (user.username.length < 2) {
+      setValidation('Username should be at least 2 characters')
       return
     }
     if (user.email.length < 10) {
@@ -51,36 +63,37 @@ const Register = () => {
       setValidation('Password should be at least 6 characters')
       return
     }
+    if (user.phone.length < 10) {
+      setValidation('Phone should 10 numbers')
+      return
+    }
+    if (user.phone.length < 4) {
+      setValidation('Address should be at least 4 characters')
+      return
+    }
 
-    dispatch(fetchUsers()).then(() => dispatch(addUser(newUser)))
-    toast.success('Registered successfully')
-    navigate('/login')
+    try {
+      await createUser(formData)
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log(error?.response?.data.message)
+      }
+    }
   }
 
   return (
     <div className="user-body">
       <div className="login-div">
         <form className="user-form" onSubmit={handleSubmit}>
-          <label htmlFor="firstName">First Name:</label>
+          <label htmlFor="username">Username:</label>
           <input
             type="text"
-            name="firstName"
-            id="firstName"
-            value={user.firstName}
+            name="username"
+            id="username"
+            value={user.username}
             onChange={handleChange}
             required
           />
-
-          <label htmlFor="lastName">Last Name:</label>
-          <input
-            type="text"
-            name="lastName"
-            id="lastName"
-            value={user.lastName}
-            onChange={handleChange}
-            required
-          />
-
           <label htmlFor="email">Email:</label>
           <input
             type="email"
@@ -90,7 +103,6 @@ const Register = () => {
             onChange={handleChange}
             required
           />
-
           <label htmlFor="password">Password:</label>
           <input
             type="password"
@@ -101,8 +113,34 @@ const Register = () => {
             required
           />
 
-          <p className="form-validation">{validation}</p>
+          <label htmlFor="image">Image:</label>
+          <input
+            type="file"
+            name="image"
+            id="image"
+            accept='image/*'
+            onChange={handleChange}
+          />
 
+          <label htmlFor="phone">Phone:</label>
+          <input
+            type="tel"
+            name="phone"
+            id="phone"
+            value={user.phone}
+            onChange={handleChange}
+            required
+          />
+
+          <label htmlFor="address">address:</label>
+          <textarea
+            name="address"
+            id="address"
+            value={user.address}
+            onChange={handleChange}
+            required
+          />
+          <p className="form-validation">{validation}</p>
           <button className="btn" type="submit">
             Register
           </button>

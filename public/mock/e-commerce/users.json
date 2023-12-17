@@ -4,7 +4,7 @@
     "firstName": "John",
     "lastName": "Doe",
     "email": "john.doe@example.com",
-    "password": "hoory123",
+    "password": "hoor123",
     "role": "admin",
     "isBlocked": false
   },
@@ -29,9 +29,9 @@
   {
     "id": 4,
     "firstName": "hoor",
-    "lastName": "t",
+    "lastName": "altoaimy",
     "email": "ht@gmail.com",
-    "password": "hoory123",
+    "password": "hoor123",
     "role": "user",
     "isBlocked": false
   }

@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -12,15 +12,31 @@ import {
 import { AppDispatch } from '../../redux/store'
 
 import AdminSidebar from './AdminSidebar'
+import axios from 'axios'
 
 const Categories = () => {
+  //-------------------------------------------------
+  // const [categories2, setCategories2] = useState([])
+
+  // const fetchCategories = async () => {
+  //   const { data } = await axios.get('http://localhost:5050/api/categories')
+  //   setCategories2(data.payload)
+  //   console.log(data)
+  // }
+  
+
+  // useEffect(() => {
+  //   fetchCategories()
+  // }, [])
+
+  //-------------------------------------------------
   const { categories, isLoading, error } = useCategoriesState()
 
   const [categoryName, setCategoryName] = useState('')
 
   const [isEdit, setIsEdit] = useState(false)
 
-  const [editId, setEditId] = useState(0)
+  const [editId, setEditId] = useState('0')
 
   const [validation, setValidation] = useState('')
 
@@ -31,12 +47,12 @@ const Categories = () => {
     setCategoryName(newCategoryName)
   }
 
-  const handleEditCategory = (id: number, name: string) => {
+  const handleEditCategory = (id: string, title: string) => {
     setEditId(id)
     setIsEdit(!isEdit)
 
     if (!isEdit) {
-      setCategoryName(name)
+      setCategoryName(title)
     } else {
       setCategoryName('')
     }
@@ -46,22 +62,24 @@ const Categories = () => {
     event.preventDefault()
 
     if (categoryName.length < 2) {
-      setValidation('Category name should be at least 2 characters')
+      setValidation('Category name should be at least 3 characters')
       return
     }
     if (isEdit) {
-      const editCategoryData = { id: editId, name: categoryName }
+      const editCategoryData = { id: editId, title: categoryName }
       dispatch(editCategory(editCategoryData))
     } else {
-      const newCategory = { id: uuidv4(), name: categoryName }
+      const newCategory = { id: uuidv4(), title: categoryName }
       dispatch(addCategory(newCategory))
     }
 
     setCategoryName('')
     setValidation('')
+    // console.log('fetched categories: ', categories2)
+    // fetchCategories()
   }
 
-  const handleDeleteCategory = (id: number) => {
+  const handleDeleteCategory = (id: string) => {
     dispatch(deleteCategory(id))
   }
 
@@ -110,16 +128,16 @@ const Categories = () => {
               </thead>
               {categories.length > 0 &&
                 categories.map((category: Category) => {
-                  const { id, name } = category
+                  const { _id, title } = category
                   return (
-                    <tr key={id}>
-                      <td>{id}</td>
-                      <td>{name}</td>
+                    <tr key={_id}>
+                      <td>{_id}</td>
+                      <td>{title}</td>
                       <td>
                         <button
                           className="btn"
                           onClick={() => {
-                            handleEditCategory(id, name)
+                            handleEditCategory(_id, title)
                           }}>
                           Edit
                         </button>
@@ -128,7 +146,7 @@ const Categories = () => {
                         <button
                           className="btn"
                           onClick={() => {
-                            handleDeleteCategory(id)
+                            handleDeleteCategory(_id)
                           }}>
                           Delete
                         </button>

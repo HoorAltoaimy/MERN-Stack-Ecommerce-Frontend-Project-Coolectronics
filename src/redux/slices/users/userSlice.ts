@@ -1,15 +1,23 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import api from '../../../api'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 export type User = {
-  id: number
-  firstName: string
-  lastName: string
+  _id: string
+  username: string
   email: string
   password: string
-  role: string
-  isBlocked: boolean
+  image: string
+  address: string
+  phone: string
+  isAdmin: boolean
+  isBanned: boolean
 }
+
+// export type userResponse = {
+//   message: string
+//   users: User[]
+// }
 
 export type UsersState = {
   users: User[]
@@ -34,15 +42,59 @@ const initialState: UsersState = {
   searchInput: ''
 }
 
-export const fetchUsers = createAsyncThunk('fetchUsers', async () => {
+export const baseURL = 'http://localhost:5050/api'
+
+export const fetchUsers = createAsyncThunk('users/fetchUsers', async () => {
   try {
-    const response = await api.get('/mock/e-commerce/users.json')
+    const response = await axios.get(`${baseURL}/users`) //get.<User[]>
     if (!response) {
       throw new Error('Network erroe')
     }
     return response.data
   } catch (error) {
     console.log(error)
+  }
+})
+
+export const deleteUser = createAsyncThunk('users/deleteUser', async (id: string) => {
+  try {
+    const response = await axios.delete<User[]>(`${baseURL}/users/${id}`)
+    if (!response) {
+      throw new Error('Network erroe')
+    }
+    return id
+  } catch (error) {
+    console.log(error)
+  }
+})
+
+export const banUser = createAsyncThunk('users/banUser', async (id: string) => {
+  //await axios.put(`${baseURL}/users/ban/${id}`)
+  //return id
+  try {
+    const response = await axios.put(`${baseURL}/users/ban/${id}`)
+    if (!response) {
+      throw new Error('Network erroe')
+    }
+    return id
+  } catch (error) {
+    toast.error('Unable to ban user')
+    //console.log(error)
+  }
+})
+
+export const unbanUser = createAsyncThunk('users/unbanUser', async (id: string) => {
+  //await axios.put(`${baseURL}/users/ban/${id}`)
+  //return id
+  try {
+    const response = await axios.put(`${baseURL}/users/unban/${id}`)
+    if (!response) {
+      throw new Error('Network erroe')
+    }
+    return id
+  } catch (error) {
+    toast.error('Unable to unban user')
+    //console.log(error)
   }
 })
 
@@ -76,11 +128,13 @@ export const usersSlice = createSlice({
       state.searchInput = action.payload
     },
     editProfile: (state, action) => {
-      const { id, firstName, lastName } = action.payload
-      const userFound = state.users.find((user) => user.id === id)
+      const { id, username } = action.payload
+      const userFound = state.users.find((user) => user._id === id)
       if (userFound) {
-        userFound.firstName = firstName
-        userFound.lastName = lastName
+        //!modification in the fileds needed
+        // userFound.firstName = firstName
+        // userFound.lastName = lastName
+        userFound.username = username
         state.userData = userFound
         localStorage.setItem(
           'loginData',
@@ -90,37 +144,65 @@ export const usersSlice = createSlice({
           })
         )
       }
-       
     },
-    deleteUser: (state, action) => {
-      const filteredUsers = state.users.filter((user) => user.id !== action.payload)
-      state.users = filteredUsers
-    },
-    blockUser: (state, action) => {
-      const id = action.payload
-      const userFound = state.users.find((user) => user.id === id)
-      if (userFound) {
-        userFound.isBlocked = !userFound.isBlocked
-      }
-    },
-    addUser: (state, action) => {
+    deleteSingleUser: (state, action) => {
       state.users.push(action.payload)
     }
   },
   extraReducers(builder) {
-    builder.addCase(fetchUsers.pending, (state) => {
-      state.isLoading = true
-    })
+    //fetchUsers
     builder.addCase(fetchUsers.fulfilled, (state, action) => {
-      state.users = action.payload
+      state.users = action.payload?.payload.users
       state.isLoading = false
     })
-    builder.addCase(fetchUsers.rejected, (state, action) => {
-      state.error = action.error.message || 'An Error has occured'
+
+    //deleteUser
+    builder.addCase(deleteUser.fulfilled, (state, action) => {
+      const id = action.payload
+      const filteredUsers = state.users.filter((user) => user._id !== id)
+      state.users = filteredUsers
       state.isLoading = false
     })
+
+    //banUser
+    builder.addCase(banUser.fulfilled, (state, action) => {
+      const id = action.payload
+      const userFound = state.users.find((user) => user._id === id)
+      if (userFound) {
+        userFound.isBanned = true
+      }
+      state.isLoading = false
+    })
+
+    //unbanUser
+    builder.addCase(unbanUser.fulfilled, (state, action) => {
+      const id = action.payload
+      const userFound = state.users.find((user) => user._id === id)
+      if (userFound) {
+        userFound.isBanned = false
+      }
+      console.log(userFound)
+      state.isLoading = false
+    })
+
+    //for all requests
+    builder.addMatcher(
+      (action) => action.type.endsWith('/pending'),
+      (state) => {
+        state.isLoading = true
+        state.error = null
+      }
+    )
+
+    builder.addMatcher(
+      (action) => action.type.endsWith('/rejected'),
+      (state, action) => {
+        state.error = action.error.message || 'An Error has occured'
+        state.isLoading = false
+      }
+    )
   }
 })
 
-export const { login, logout, searchUser, editProfile, deleteUser, blockUser, addUser } = usersSlice.actions
+export const { login, logout, searchUser, editProfile } = usersSlice.actions
 export default usersSlice.reducer

@@ -58,13 +58,14 @@ export const fetchUsers = createAsyncThunk('users/fetchUsers', async () => {
 
 export const deleteUser = createAsyncThunk('users/deleteUser', async (id: string) => {
   try {
-    const response = await axios.delete<User[]>(`${baseURL}/users/${id}`)
+  const response = await axios.delete<User[]>(`${baseURL}/users/${id}`)
     if (!response) {
       throw new Error('Network erroe')
     }
     return id
   } catch (error) {
-    console.log(error)
+    toast.error('Unable to delete user')
+    //console.log(error)
   }
 })
 

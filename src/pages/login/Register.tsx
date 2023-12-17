@@ -118,8 +118,9 @@ const Register = () => {
             type="file"
             name="image"
             id="image"
-            accept='image/*'
+            accept="image/*"
             onChange={handleChange}
+            required
           />
 
           <label htmlFor="phone">Phone:</label>

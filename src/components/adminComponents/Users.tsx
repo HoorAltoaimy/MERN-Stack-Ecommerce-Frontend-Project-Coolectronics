@@ -12,7 +12,7 @@ import axios from 'axios'
 
 const Users = () => {
   const { users, isLoading, error, searchInput } = useUsersState()
-
+  console.log(users);
   const dispatch: AppDispatch = useDispatch()
 
   useEffect(() => {
@@ -33,7 +33,7 @@ const Users = () => {
 
   const handleDeleteUser = async (id: string) => {
     try {
-      dispatch(deleteUser(id))
+    dispatch(deleteUser(id))
         toast.success('User deleted successfully')
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -91,7 +91,17 @@ const Users = () => {
                 return (
                   <tr key={_id} className="users-card">
                     <td>{_id}</td>
-                    <td>{<img src={`http://localhost:5050/${image}`} alt={username} width={50} height={50} />}</td>
+                    {/* <td>{<img src={`http://localhost:5050/${image}`} alt={username} width={50} height={50} />}</td> */}
+                    <td>
+                      {
+                        <img
+                          src={image}
+                          alt={username}
+                          width={50}
+                          height={50}
+                        />
+                      }
+                    </td>
                     <td>{username}</td>
                     <td>{email}</td>
                     <td>{isBanned}</td>
@@ -108,7 +118,7 @@ const Users = () => {
                       <button
                         className="btn"
                         onClick={() => {
-                          handleBanStatus(_id, isBanned) 
+                          handleBanStatus(_id, isBanned)
                         }}>
                         {isBanned ? 'Unban' : 'Ban'}
                       </button>

@@ -1,13 +1,15 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
+import { toast } from 'react-toastify'
 import { v4 as uuidv4 } from 'uuid'
 
 import useCategoriesState from '../../hooks/useCategoriesState'
 import {
   Category,
-  addCategory,
+  createCategory,
   deleteCategory,
-  editCategory
+  editCategory,
+  fetchCategories
 } from '../../redux/slices/categories/categoriesSlice'
 import { AppDispatch } from '../../redux/store'
 
@@ -23,7 +25,6 @@ const Categories = () => {
   //   setCategories2(data.payload)
   //   console.log(data)
   // }
-  
 
   // useEffect(() => {
   //   fetchCategories()
@@ -42,6 +43,11 @@ const Categories = () => {
 
   const dispatch: AppDispatch = useDispatch()
 
+  useEffect(() => {
+    dispatch(fetchCategories())
+  }, [dispatch])
+  console.log(categories);
+
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newCategoryName = event.target.value
     setCategoryName(newCategoryName)
@@ -58,19 +64,30 @@ const Categories = () => {
     }
   }
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
 
-    if (categoryName.length < 2) {
+    const formData = new FormData()
+    formData.append('title', categoryName)
+
+    if (categoryName.length < 3) {
       setValidation('Category name should be at least 3 characters')
       return
     }
     if (isEdit) {
       const editCategoryData = { id: editId, title: categoryName }
       dispatch(editCategory(editCategoryData))
+
     } else {
-      const newCategory = { id: uuidv4(), title: categoryName }
-      dispatch(addCategory(newCategory))
+      // const newCategory = { _id: uuidv4(), title: categoryName }
+      //dispatch(addCategory(newCategory))
+      try {
+         dispatch(createCategory(categoryName))
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          console.log(error?.response?.data.message)
+        }
+      }
     }
 
     setCategoryName('')
@@ -80,15 +97,22 @@ const Categories = () => {
   }
 
   const handleDeleteCategory = (id: string) => {
-    dispatch(deleteCategory(id))
+    try {
+      dispatch(deleteCategory(id))
+      toast.success('Category deleted successfully')
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log(error?.response?.data.message)
+      }
+    }
   }
 
-  if (isLoading) {
-    return <p>Loading...</p>
-  }
-  if (error) {
-    return <p>{error}</p>
-  }
+  // if (isLoading) {
+  //   return <p>Loading...</p>
+  // }
+  // if (error) {
+  //   return <p>{error}</p>
+  // }
 
   return (
     <div className="admin-container">

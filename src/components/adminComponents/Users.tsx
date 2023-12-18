@@ -3,7 +3,14 @@ import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 
 import useUsersState from '../../hooks/useUsersState'
-import { User, banUser, deleteUser, fetchUsers, searchUser, unbanUser } from '../../redux/slices/users/userSlice'
+import {
+  User,
+  banUser,
+  deleteUser,
+  fetchUsers,
+  searchUser,
+  unbanUser
+} from '../../redux/slices/users/userSlice'
 import { AppDispatch } from '../../redux/store'
 
 import Search from '../products/Search'
@@ -12,13 +19,12 @@ import axios from 'axios'
 
 const Users = () => {
   const { users, isLoading, error, searchInput } = useUsersState()
-  console.log(users);
+
   const dispatch: AppDispatch = useDispatch()
 
   useEffect(() => {
     dispatch(fetchUsers())
   }, [dispatch])
-  
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     const searchItem = event.target.value
@@ -33,18 +39,18 @@ const Users = () => {
 
   const handleDeleteUser = async (id: string) => {
     try {
-    dispatch(deleteUser(id))
-        toast.success('User deleted successfully')
+      dispatch(deleteUser(id))
+      toast.success('User deleted successfully')
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.log(error?.response?.data.message);
+        console.log(error?.response?.data.message)
       }
     }
   }
 
   const handleBanStatus = (id: string, isBanned: boolean) => {
     try {
-      isBanned ?  dispatch(unbanUser(id)) :  dispatch(banUser(id))
+      isBanned ? dispatch(unbanUser(id)) : dispatch(banUser(id))
       toast.success('User ban status updated successfully')
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -53,12 +59,12 @@ const Users = () => {
     }
   }
 
-    // if (isLoading) {
-    //   return <p>Loading...</p>
-    // }
-    // if (error) {
-    //   return <p>{error}</p>
-    // }
+  // if (isLoading) {
+  //   return <p>Loading...</p>
+  // }
+  // if (error) {
+  //   return <p>{error}</p>
+  // }
 
   return (
     <div className="admin-container">
@@ -92,16 +98,7 @@ const Users = () => {
                   <tr key={_id} className="users-card">
                     <td>{_id}</td>
                     {/* <td>{<img src={`http://localhost:5050/${image}`} alt={username} width={50} height={50} />}</td> */}
-                    <td>
-                      {
-                        <img
-                          src={image}
-                          alt={username}
-                          width={50}
-                          height={50}
-                        />
-                      }
-                    </td>
+                    <td>{<img src={image} alt={username} width={50} height={50} />}</td>
                     <td>{username}</td>
                     <td>{email}</td>
                     <td>{isBanned}</td>

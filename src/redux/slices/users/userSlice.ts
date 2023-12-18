@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
-import { toast } from 'react-toastify'
 
 export type User = {
   _id: string
@@ -64,8 +63,7 @@ export const deleteUser = createAsyncThunk('users/deleteUser', async (id: string
     }
     return id
   } catch (error) {
-    toast.error('Unable to delete user')
-    //console.log(error)
+    console.log(error)
   }
 })
 
@@ -79,8 +77,7 @@ export const banUser = createAsyncThunk('users/banUser', async (id: string) => {
     }
     return id
   } catch (error) {
-    toast.error('Unable to ban user')
-    //console.log(error)
+    console.log(error)
   }
 })
 
@@ -94,8 +91,7 @@ export const unbanUser = createAsyncThunk('users/unbanUser', async (id: string) 
     }
     return id
   } catch (error) {
-    toast.error('Unable to unban user')
-    //console.log(error)
+    console.log(error)
   }
 })
 
@@ -161,7 +157,9 @@ export const usersSlice = createSlice({
     builder.addCase(deleteUser.fulfilled, (state, action) => {
       const id = action.payload
       const filteredUsers = state.users.filter((user) => user._id !== id)
-      state.users = filteredUsers
+      if (filteredUsers) {
+        state.users = filteredUsers
+      }
       state.isLoading = false
     })
 
@@ -182,7 +180,6 @@ export const usersSlice = createSlice({
       if (userFound) {
         userFound.isBanned = false
       }
-      console.log(userFound)
       state.isLoading = false
     })
 

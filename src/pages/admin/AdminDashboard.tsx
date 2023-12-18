@@ -14,8 +14,7 @@ const AdminDashboard = () => {
   const [isFormOpen, setIsFormOpen] = useState(false)
 
   const [user, setUser] = useState({
-    firstName: userData?.firstName,
-    lastName: userData?.lastName
+    username: userData?.username
   })
 
   const [validation, setValidation] = useState('')
@@ -32,14 +31,10 @@ const AdminDashboard = () => {
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    const editUserData = { id: userData?.id, ...user }
+    const editUserData = { id: userData?._id, ...user }
 
-    if (user.firstName && user.firstName.length < 2) {
-      setValidation('First name should be at least 2 characters')
-      return
-    }
-    if (user.lastName && user.lastName.length < 2) {
-      setValidation('Last name should be at least 2 characters')
+    if (user.username && user.username.length < 3) {
+      setValidation('Username should be at least 3 characters')
       return
     }
 
@@ -56,7 +51,7 @@ const AdminDashboard = () => {
       <AdminSidebar />
       <div className="admin-main-content">
         <div className="admin-info">
-          <p>{userData?.firstName + ' ' + userData?.lastName}</p>
+          <p>{userData?.username}</p>
         </div>
         <div className="admin-info">
           <p>{userData?.email}</p>
@@ -68,28 +63,18 @@ const AdminDashboard = () => {
         <div>
           {isFormOpen && (
             <form onSubmit={handleSubmit}>
-              <label htmlFor="firstName">First Name: </label>
+              <label htmlFor="username">Username: </label>
               <input
                 type="text"
-                name="firstName"
-                id="firstName"
-                value={user.firstName}
+                name="username"
+                id="username"
+                value={user.username}
                 onChange={handleChange}
               />
-              <label htmlFor="lastName">Last Name: </label>
-              <input
-                type="text"
-                name="lastName"
-                id="lastName"
-                value={user.lastName}
-                onChange={handleChange}
-              />
-              <p className="form-validation">{validation}</p>
 
               <button className="btn" type="submit">
                 Save
               </button>
-
             </form>
           )}
         </div>

@@ -16,7 +16,7 @@ const AdminSidebar = () => {
           <FaUser />
         </div>
         <div className="admin-info">
-          <p>{userData?.firstName + ' ' + userData?.lastName}</p>
+          <p>{userData?.username}</p>
         </div>
         <div className="admin-info">
           <p>{userData?.email}</p>

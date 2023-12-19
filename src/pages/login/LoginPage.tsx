@@ -1,14 +1,16 @@
-import { ChangeEvent, FormEvent, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
 import useUsersState from '../../hooks/useUsersState'
-import { login } from '../../redux/slices/users/userSlice'
+//import { login } from '../../redux/slices/users/userSlice'
 import { AppDispatch } from '../../redux/store'
+import { loginUser } from '../../redux/slices/users/userSlice'
+import UserProfile from '../user/UserProfile'
 
-const LoginPage = () => {
-  const { users } = useUsersState()
+const LoginPage = ({pathName = ''}: {pathName: string}) => {
+  const { users, userData } = useUsersState()
 
   const navigate = useNavigate()
 
@@ -23,46 +25,63 @@ const LoginPage = () => {
     })
   }
 
+  useEffect(() => {
+    if (userData) {
+      navigate(
+        pathName
+          ? pathName
+          : `${userData && userData.isAdmin ? '/admin/adminDashboard' : '/user/userProfile'}`
+      )
+    }
+  }, [userData, navigate, pathName])
+  
+
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    try {
-      const userFound = users.find(
-        (userData) => userData.email === user.email && userData.password === user.password
-      )
 
-      if (!userFound) {
-        toast.error('Wrong email or password')
-        setUser({
-          email: '',
-          password: ''
-        })
-        return
-      }
-      if (userFound.isBlocked) {
-        toast.error('You are blocked!')
-        setUser({
-          email: '',
-          password: ''
-        })
-        return
-      }
-      if (userFound) {
-        dispatch(login(userFound))
-        if (userFound.role === 'admin') {
-          navigate('/admin/adminDashboard')
-        }
-        if (userFound.role === 'user') {
-          navigate('/user/userProfile')
-        }
-      }
+    try {
+      dispatch(loginUser(user))
+      // console.log(userData)
+      // console.log(`${userData?.isAdmin ? '/admin/adminDashboard' : '/user/UserProfile'}`)
+            // navigate(`${userData?.isAdmin ? '/admin/adminDashboard' : '/user/UserProfile'}`)
+
+      // const userFound = users.find(
+      //   (userData) => userData.email === user.email && userData.password === user.password
+      // )
+
+      // if (!userFound) {
+      //   toast.error('Wrong email or password')
+      //   setUser({
+      //     email: '',
+      //     password: ''
+      //   })
+      //   return
+      // }
+      // if (userFound.isBanned) {
+      //   toast.error('You are blocked!')
+      //   setUser({
+      //     email: '',
+      //     password: ''
+      //   })
+      //   return
+      // }
+      // if (userFound) {
+      //   dispatch(login(userFound))
+      //   if (userFound.isAdmin) {
+      //     navigate('/admin/adminDashboard')
+      //   }
+      //   else{
+      //     navigate('/user/userProfile')
+      //   }
+      // }
     } catch (error) {
       console.log(error)
     }
 
-    setUser({
-      email: '',
-      password: ''
-    })
+    // setUser({
+    //   email: '',
+    //   password: ''
+    // })
   }
 
   return (

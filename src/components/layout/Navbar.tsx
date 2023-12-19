@@ -2,7 +2,7 @@ import { useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 
 import useUsersState from '../../hooks/useUsersState'
-import { logout } from '../../redux/slices/users/userSlice'
+import { logoutUser } from '../../redux/slices/users/userSlice'
 import { AppDispatch } from '../../redux/store'
 
 import CartIcon from '../userComponents/CartIcon'
@@ -17,13 +17,8 @@ const Navbar = () => {
 
   const navigate = useNavigate()
 
-  let userRole
-  if (userData) {
-    userRole = userData.role
-  }
-
   const handleLogout = () => {
-    dispatch(logout())
+    dispatch(logoutUser())
     navigate('/')
   }
 
@@ -40,15 +35,28 @@ const Navbar = () => {
               <Link to="/">Home</Link>
             </li>
 
-            {isLoggedin && userRole === 'admin' && (
+            {/* {isLoggedin && userData?.isAdmin && (
               <li>
                 <Link to="/admin/adminDashboard">Admin Dashboard</Link>
               </li>
             )}
-            {isLoggedin && userRole === 'user' && (
+            {isLoggedin && !userData?.isAdmin && (
               <li>
                 <Link to="/user/userProfile">User Profile</Link>
               </li>
+            )} */}
+
+            {isLoggedin && (
+              <>
+                <li>
+                  <Link
+                    to={`${
+                      userData && userData.isAdmin ? '/admin/adminDashboard' : '/user/userProfile'
+                    }`}>
+                    {userData && userData.isAdmin ? 'Admin Dashboard' : 'User profile'}
+                  </Link>
+                </li>
+              </>
             )}
 
             <li>

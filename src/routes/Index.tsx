@@ -28,13 +28,13 @@ const Index = () => {
         <Route path="/" element={<Home />} />
         <Route path="/productDetails/:idNumber" element={<ProductDetails />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={<LoginPage pathName='' />} />
         <Route path="/logout" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/users/activate/:token" element={<Activate />} />
 
-        {/* <Route path="/admin" element={<AdminProtectedRoutes />}> */}
-        <Route path="/admin">
+        <Route path="/admin" element={<AdminProtectedRoutes />}>
+        {/* <Route path="/admin"> */}
           <Route path="adminDashboard" element={<AdminDashboard />} />
           <Route path="adminDashboard/categories" element={<Categories />} />
           <Route path="adminDashboard/products" element={<Products />} />
@@ -42,9 +42,9 @@ const Index = () => {
           <Route path="adminDashboard/orders" element={<Orders />} />
         </Route>
 
-        {/* <Route path="/user" element={<UserProtectedRoutes />}> */}
+        <Route path="/user" element={<UserProtectedRoutes />}>
         <Route path="userProfile" element={<UserProfile />} />
-        {/* </Route> */}
+        </Route>
 
         <Route path="/*" element={<Error />} />
       </Routes>

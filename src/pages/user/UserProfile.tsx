@@ -12,8 +12,7 @@ const UserProfile = () => {
   const [isFormOpen, setIsFormOpen] = useState(false)
 
   const [user, setUser] = useState({
-    firstName: userData?.firstName,
-    lastName: userData?.lastName
+    username: userData?.username
   })
 
   const [validation, setValidation] = useState('')
@@ -29,14 +28,10 @@ const UserProfile = () => {
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    const editUserData = { id: userData?.id, ...user }
+    const editUserData = { id: userData?._id, ...user }
 
-    if (user.firstName && user.firstName.length < 2) {
-      setValidation('First name should be at least 2 characters')
-      return
-    }
-    if (user.lastName && user.lastName.length < 2) {
-      setValidation('Last name should be at least 2 characters')
+    if (user.username && user.username.length < 3) {
+      setValidation('Username should be at least 3 characters')
       return
     }
 
@@ -54,10 +49,9 @@ const UserProfile = () => {
         <h3 className="title">USER PROFILE</h3>
         {userData && (
           <div className="user-form">
-            <div key={userData.id}>
-              <p>User ID: {userData.id}</p>
-              <p>First name: {userData.firstName}</p>
-              <p>Last name: {userData.lastName}</p>
+            <div key={userData._id}>
+              <p>User ID: {userData._id}</p>
+              <p>Username: {userData.username}</p>
               <p>Email: {userData.email}</p>
               <button className="btn" onClick={handleFormOpen}>
                 Edit
@@ -67,20 +61,12 @@ const UserProfile = () => {
             <div>
               {isFormOpen && (
                 <form onSubmit={handleSubmit}>
-                  <label htmlFor="firstName">First Name: </label>
+                  <label htmlFor="firstName">Userame: </label>
                   <input
                     type="text"
                     name="firstName"
                     id="firstName"
-                    value={user.firstName}
-                    onChange={handleChange}
-                  />
-                  <label htmlFor="lastName">Last Name: </label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    id="lastName"
-                    value={user.lastName}
+                    value={user.username}
                     onChange={handleChange}
                   />
                   <p className="form-validation">{validation}</p>
@@ -88,7 +74,6 @@ const UserProfile = () => {
                   <button className="btn" type="submit">
                     Save
                   </button>
-
                 </form>
               )}
             </div>

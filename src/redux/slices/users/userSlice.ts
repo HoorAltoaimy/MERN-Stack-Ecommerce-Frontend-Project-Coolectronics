@@ -118,32 +118,56 @@ export const unbanUser = createAsyncThunk('users/unbanUser', async (id: string) 
   }
 })
 
+export const loginUser = createAsyncThunk('users/loginUser', async (user: object) => {
+  try {
+    const response = await axios.post(`${baseURL}/auth/login`, user)
+    if (!response) {
+      throw new Error('No response')
+    }
+    return response.data
+  } catch (error) {
+    throw new Error('Failed to login')
+  }
+})
+
+export const logoutUser = createAsyncThunk('users/logoutUser', async () => {
+  try {
+    const response = await axios.post(`${baseURL}/auth/logout`)
+    if (!response) {
+      throw new Error('No response')
+    }
+    return response.data
+  } catch (error) {
+    throw new Error('Failed to login')
+  }
+})
+
 export const usersSlice = createSlice({
   name: 'users',
   initialState,
   reducers: {
-    login: (state, action) => {
-      state.isLoggedin = true
-      state.userData = action.payload
-      localStorage.setItem(
-        'loginData',
-        JSON.stringify({
-          isLoggedin: state.isLoggedin,
-          userData: state.userData
-        })
-      )
-    },
-    logout: (state) => {
-      state.isLoggedin = false
-      state.userData = null
-      localStorage.setItem(
-        'loginData',
-        JSON.stringify({
-          isLoggedin: state.isLoggedin,
-          userData: state.userData
-        })
-      )
-    },
+    // login: (state, action) => {
+    //   state.isLoggedin = true
+    //   state.userData = action.payload
+    //   localStorage.setItem(
+    //     'loginData',
+    //     JSON.stringify({
+    //       isLoggedin: state.isLoggedin,
+    //       userData: state.userData
+    //     })
+    //   )
+    // },
+    // logout: (state) => {
+    //   state.isLoggedin = false
+    //   state.userData = null
+    //   localStorage.setItem(
+    //     'loginData',
+    //     JSON.stringify({
+    //       isLoggedin: state.isLoggedin,
+    //       userData: state.userData
+    //     })
+    //   )
+    // },
     searchUser: (state, action) => {
       state.searchInput = action.payload
     },
@@ -162,9 +186,9 @@ export const usersSlice = createSlice({
         )
       }
     },
-    deleteSingleUser: (state, action) => {
-      state.users.push(action.payload)
-    }
+    // deleteSingleUser: (state, action) => {
+    //   state.users.push(action.payload)
+    // }
   },
   extraReducers(builder) {
     //fetchUsers
@@ -213,6 +237,32 @@ export const usersSlice = createSlice({
       state.isLoading = false
     })
 
+    //loginUser
+    builder.addCase(loginUser.fulfilled, (state, action) => {
+      state.isLoggedin = true
+      state.userData = action.payload.payload
+      localStorage.setItem(
+        'loginData',
+        JSON.stringify({
+          isLoggedin: state.isLoggedin,
+          userData: state.userData
+        })
+      )
+    })
+
+    //logoutUser
+    builder.addCase(logoutUser.fulfilled, (state) => {
+      state.isLoggedin = false
+      state.userData = null
+      localStorage.setItem(
+        'loginData',
+        JSON.stringify({
+          isLoggedin: state.isLoggedin,
+          userData: state.userData
+        })
+      )
+    })
+
     //for all requests
     builder.addMatcher(
       (action) => action.type.endsWith('/pending'),
@@ -232,5 +282,5 @@ export const usersSlice = createSlice({
   }
 })
 
-export const { login, logout, searchUser, editProfile } = usersSlice.actions
+export const { searchUser, editProfile } = usersSlice.actions
 export default usersSlice.reducer

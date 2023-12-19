@@ -7,8 +7,6 @@ import { activateUser } from '../../redux/slices/users/userSlice'
 import { AppDispatch } from '../../redux/store'
 import { useDispatch } from 'react-redux'
 
-//import { activateUser } from '../../services/userServices'
-
 interface DecodedToken {
   username: string
   email: string
@@ -31,7 +29,6 @@ const Activate = () => {
   const handleActivate = async () => {
     try {
       if (token) {
-        //await activateUser(token)
 
         const response = await dispatch(activateUser(token))
 

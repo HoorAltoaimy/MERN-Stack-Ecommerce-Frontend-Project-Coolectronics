@@ -30,9 +30,7 @@ const Register = () => {
     const {name, type} = event.target
     if (type === 'file') {
       const fileInput = (event.target as HTMLInputElement) || ''
-      // const file = fileInput.files?.[0].name 
       const file = fileInput.files?.[0]
-      console.log(file);
       setUser((prevUsers) => {
         return { ...prevUsers, [name]: file }
       })
@@ -78,7 +76,6 @@ const Register = () => {
     }
 
     try {
-      //await createUser(formData)
       const response = await dispatch(createUser(formData))
      
       if (response.meta.requestStatus === 'fulfilled') {

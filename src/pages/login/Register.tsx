@@ -1,12 +1,12 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
-//import { useDispatch } from 'react-redux'
+import { useDispatch } from 'react-redux'
 //import { useNavigate } from 'react-router-dom'
-//import { toast } from 'react-toastify'
-//import { v4 as uuidv4 } from 'uuid'
+import { toast } from 'react-toastify'
 import axios from 'axios'
-import { createUser } from '../../services/userServices'
 
-//import { AppDispatch } from '../../redux/store'
+import { AppDispatch } from '../../redux/store'
+import { createUser } from '../../redux/slices/users/userSlice'
+//import { createUser } from '../../services/userServices'
 
 const Register = () => {
   const [user, setUser] = useState({
@@ -18,21 +18,25 @@ const Register = () => {
     address: ''
   })
 
+  console.log(user)
+
   const [validation, setValidation] = useState('')
 
-  //const dispatch: AppDispatch = useDispatch()
+  const dispatch: AppDispatch = useDispatch()
 
   //const navigate = useNavigate()
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if (event.target.type === 'file') {
+    const {name, type} = event.target
+    if (type === 'file') {
       const fileInput = (event.target as HTMLInputElement) || ''
-      const [ name ] = event.target.name
+      // const file = fileInput.files?.[0].name 
+      const file = fileInput.files?.[0]
+      console.log(file);
       setUser((prevUsers) => {
-        return { ...prevUsers, [name]: fileInput.files?.[0].name }
+        return { ...prevUsers, [name]: file }
       })
-    }
-    else {
+    } else {
       const { name, value } = event.target
       setUser((prevUsers) => {
         return { ...prevUsers, [name]: value }
@@ -42,7 +46,7 @@ const Register = () => {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
-
+    
     const formData = new FormData()
     formData.append('username', user.username)
     formData.append('email', user.email)
@@ -50,6 +54,7 @@ const Register = () => {
     formData.append('image', user.image)
     formData.append('phone', user.phone)
     formData.append('address', user.address)
+
 
     if (user.username.length < 2) {
       setValidation('Username should be at least 2 characters')
@@ -73,10 +78,36 @@ const Register = () => {
     }
 
     try {
-      await createUser(formData)
+      //await createUser(formData)
+      const response = await dispatch(createUser(formData))
+     
+      if (response.meta.requestStatus === 'fulfilled') {
+        toast.success('Check your email for activation', {
+          position: 'top-right',
+          autoClose: 3000,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        })
+      }
+      if (response.meta.requestStatus === 'rejected') {
+        toast.error('Unable to create new user', {
+          position: 'top-right',
+          autoClose: 3000,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        })
+      }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.log(error?.response?.data.message)
+        toast.error(error?.response?.data.message, {
+          position: 'top-right',
+          autoClose: 3000,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        })
       }
     }
   }

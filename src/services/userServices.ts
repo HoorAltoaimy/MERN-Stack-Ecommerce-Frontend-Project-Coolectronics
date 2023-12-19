@@ -20,9 +20,9 @@ export const createUser = async (newUser: FormData) => {
 }
 
 export const activateUser = async (token: string) => {
-    try {
-      console.log(token);
-    const response = await axios.post(`${baseURL}/users/activate`, {token})
+  try {
+    console.log(token)
+    const response = await axios.post(`${baseURL}/users/activate`, { token })
     if (!response) {
       throw new Error('Network erroe')
     }

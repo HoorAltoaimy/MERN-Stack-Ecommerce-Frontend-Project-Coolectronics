@@ -1,7 +1,7 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
-import { v4 as uuidv4 } from 'uuid'
+import axios from 'axios'
 
 import useCategoriesState from '../../hooks/useCategoriesState'
 import {
@@ -12,25 +12,10 @@ import {
   fetchCategories
 } from '../../redux/slices/categories/categoriesSlice'
 import { AppDispatch } from '../../redux/store'
-
 import AdminSidebar from './AdminSidebar'
-import axios from 'axios'
+
 
 const Categories = () => {
-  //-------------------------------------------------
-  // const [categories2, setCategories2] = useState([])
-
-  // const fetchCategories = async () => {
-  //   const { data } = await axios.get('http://localhost:5050/api/categories')
-  //   setCategories2(data.payload)
-  //   console.log(data)
-  // }
-
-  // useEffect(() => {
-  //   fetchCategories()
-  // }, [])
-
-  //-------------------------------------------------
   const { categories, isLoading, error } = useCategoriesState()
 
   const [categoryName, setCategoryName] = useState('')
@@ -52,7 +37,7 @@ const Categories = () => {
     const newCategoryName = event.target.value
     setCategoryName(newCategoryName)
   }
-
+  
   const handleEditCategory = (id: string, title: string) => {
     setEditId(id)
     setIsEdit(!isEdit)
@@ -66,23 +51,21 @@ const Categories = () => {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
-
-    const formData = new FormData()
-    formData.append('title', categoryName)
-
+    
     if (categoryName.length < 3) {
       setValidation('Category name should be at least 3 characters')
       return
     }
     if (isEdit) {
-      const editCategoryData = { id: editId, title: categoryName }
-      dispatch(editCategory(editCategoryData))
+      const editedCategoryData = { _id: editId, title: categoryName }
+      dispatch(editCategory(editedCategoryData))
 
     } else {
-      // const newCategory = { _id: uuidv4(), title: categoryName }
-      //dispatch(addCategory(newCategory))
       try {
-         dispatch(createCategory(categoryName))
+        const newCategory = { title: categoryName }
+        const response =  dispatch(createCategory(newCategory))
+        dispatch(fetchCategories())
+        console.log(response)
       } catch (error) {
         if (axios.isAxiosError(error)) {
           console.log(error?.response?.data.message)
@@ -92,8 +75,6 @@ const Categories = () => {
 
     setCategoryName('')
     setValidation('')
-    // console.log('fetched categories: ', categories2)
-    // fetchCategories()
   }
 
   const handleDeleteCategory = (id: string) => {

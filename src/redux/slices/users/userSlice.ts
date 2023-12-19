@@ -47,51 +47,74 @@ export const fetchUsers = createAsyncThunk('users/fetchUsers', async () => {
   try {
     const response = await axios.get(`${baseURL}/users`) //get.<User[]>
     if (!response) {
-      throw new Error('Network erroe')
+      throw new Error('No response')
     }
     return response.data
   } catch (error) {
-    console.log(error)
+    throw new Error('Failed to fetch users')
+  }
+})
+
+export const createUser = createAsyncThunk('users/createUser', async (newUser: FormData) => {
+  try {
+    const response = await axios.post(`${baseURL}/users/process-register`, newUser)
+    if (!response) {
+      throw new Error('No response')
+    }
+    return response.data
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error('Failed to create new user')
+    }
+  }
+})
+
+export const activateUser = createAsyncThunk('users/activateUser', async (token: string) => {
+  try {
+    const response = await axios.post(`${baseURL}/users/activate`, { token })
+    if (!response) {
+      throw new Error('No response')
+    }
+    console.log(response.data)
+    return response.data
+  } catch (error) {
+    throw new Error('Failed to activate the user')
   }
 })
 
 export const deleteUser = createAsyncThunk('users/deleteUser', async (id: string) => {
   try {
-  const response = await axios.delete<User[]>(`${baseURL}/users/${id}`)
+    const response = await axios.delete(`${baseURL}/users/${id}`) //<User[]>
     if (!response) {
-      throw new Error('Network erroe')
+      throw new Error('No response')
     }
     return id
   } catch (error) {
-    console.log(error)
+    throw new Error('Failed to delete user')
   }
 })
 
 export const banUser = createAsyncThunk('users/banUser', async (id: string) => {
-  //await axios.put(`${baseURL}/users/ban/${id}`)
-  //return id
   try {
     const response = await axios.put(`${baseURL}/users/ban/${id}`)
     if (!response) {
-      throw new Error('Network erroe')
+      throw new Error('No response')
     }
     return id
   } catch (error) {
-    console.log(error)
+    throw new Error('Failed to ban user')
   }
 })
 
 export const unbanUser = createAsyncThunk('users/unbanUser', async (id: string) => {
-  //await axios.put(`${baseURL}/users/ban/${id}`)
-  //return id
   try {
     const response = await axios.put(`${baseURL}/users/unban/${id}`)
     if (!response) {
-      throw new Error('Network erroe')
+      throw new Error('No response')
     }
     return id
   } catch (error) {
-    console.log(error)
+    throw new Error('Failed to unban user')
   }
 })
 
@@ -108,7 +131,7 @@ export const usersSlice = createSlice({
           isLoggedin: state.isLoggedin,
           userData: state.userData
         })
-      ) //arguments ('key', value)
+      )
     },
     logout: (state) => {
       state.isLoggedin = false
@@ -128,9 +151,6 @@ export const usersSlice = createSlice({
       const { id, username } = action.payload
       const userFound = state.users.find((user) => user._id === id)
       if (userFound) {
-        //!modification in the fileds needed
-        // userFound.firstName = firstName
-        // userFound.lastName = lastName
         userFound.username = username
         state.userData = userFound
         localStorage.setItem(
@@ -151,6 +171,16 @@ export const usersSlice = createSlice({
     builder.addCase(fetchUsers.fulfilled, (state, action) => {
       state.users = action.payload?.payload.users
       state.isLoading = false
+    })
+
+    //createUser
+    builder.addCase(createUser.fulfilled, (state) => {
+      state.isLoading = false
+    })
+
+    //activateUser
+    builder.addCase(activateUser.fulfilled, (state, action) => {
+      state.users.push(action.payload.payload)
     })
 
     //deleteUser

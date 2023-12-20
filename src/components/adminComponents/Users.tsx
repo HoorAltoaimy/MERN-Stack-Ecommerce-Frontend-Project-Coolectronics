@@ -6,6 +6,7 @@ import useUsersState from '../../hooks/useUsersState'
 import {
   User,
   banUser,
+  clearError,
   deleteUser,
   fetchUsers,
   searchUser,
@@ -19,8 +20,21 @@ import axios from 'axios'
 
 const Users = () => {
   const { users, isLoading, error, searchInput } = useUsersState()
-console.log(users);
+
   const dispatch: AppDispatch = useDispatch()
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error, {
+        onClose: () => dispatch(clearError()),
+        position: 'top-right',
+        autoClose: 3000,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      })
+    }
+  }, [error])
 
   useEffect(() => {
     dispatch(fetchUsers())
@@ -43,15 +57,6 @@ console.log(users);
 
       if (response.meta.requestStatus === 'fulfilled') {
         toast.success('User deleted successfully', {
-          position: 'top-right',
-          autoClose: 3000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        })
-      }
-      if (response.meta.requestStatus === 'rejected') {
-        toast.error('Unable to delete the user', {
           position: 'top-right',
           autoClose: 3000,
           closeOnClick: true,

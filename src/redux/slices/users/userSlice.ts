@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
+axios.defaults.withCredentials = true
+
 export type User = {
   _id: string
   username: string
@@ -12,11 +14,6 @@ export type User = {
   isAdmin: boolean
   isBanned: boolean
 }
-
-// export type userResponse = {
-//   message: string
-//   users: User[]
-// }
 
 export type UsersState = {
   users: User[]
@@ -75,24 +72,50 @@ export const activateUser = createAsyncThunk('users/activateUser', async (token:
     if (!response) {
       throw new Error('No response')
     }
-    console.log(response.data)
     return response.data
   } catch (error) {
     throw new Error('Failed to activate the user')
   }
 })
 
-export const deleteUser = createAsyncThunk('users/deleteUser', async (id: string) => {
-  try {
-    const response = await axios.delete(`${baseURL}/users/${id}`) //<User[]>
-    if (!response) {
-      throw new Error('No response')
+export const deleteUser = createAsyncThunk(
+  'users/deleteUser',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.delete<User[]>(`${baseURL}/users/${id}`)
+      if (!response) {
+        throw new Error('No response')
+      }
+      return id
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data.msg)
+      }
+      //throw new Error('Failed to delete user')
     }
-    return id
-  } catch (error) {
-    throw new Error('Failed to delete user')
   }
-})
+)
+
+export const updateUserProfile = createAsyncThunk(
+  'users/updateUserProfile',
+  async (userData: object, { rejectWithValue }) => {
+    try {
+      const response = await axios.put<User[]>(
+        `${baseURL}/users/update-user-info/${userData._id}`,
+        userData
+      )
+      if (!response) {
+        throw new Error('No response')
+      }
+      // return userData._id
+      return response.data
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data.msg)
+      }
+    }
+  }
+)
 
 export const banUser = createAsyncThunk('users/banUser', async (id: string) => {
   try {
@@ -146,49 +169,12 @@ export const usersSlice = createSlice({
   name: 'users',
   initialState,
   reducers: {
-    // login: (state, action) => {
-    //   state.isLoggedin = true
-    //   state.userData = action.payload
-    //   localStorage.setItem(
-    //     'loginData',
-    //     JSON.stringify({
-    //       isLoggedin: state.isLoggedin,
-    //       userData: state.userData
-    //     })
-    //   )
-    // },
-    // logout: (state) => {
-    //   state.isLoggedin = false
-    //   state.userData = null
-    //   localStorage.setItem(
-    //     'loginData',
-    //     JSON.stringify({
-    //       isLoggedin: state.isLoggedin,
-    //       userData: state.userData
-    //     })
-    //   )
-    // },
     searchUser: (state, action) => {
       state.searchInput = action.payload
     },
-    editProfile: (state, action) => {
-      const { id, username } = action.payload
-      const userFound = state.users.find((user) => user._id === id)
-      if (userFound) {
-        userFound.username = username
-        state.userData = userFound
-        localStorage.setItem(
-          'loginData',
-          JSON.stringify({
-            isLoggedin: state.isLoggedin,
-            userData: state.userData
-          })
-        )
-      }
-    },
-    // deleteSingleUser: (state, action) => {
-    //   state.users.push(action.payload)
-    // }
+    clearError: (state) => {
+      state.error = null
+    }
   },
   extraReducers(builder) {
     //fetchUsers
@@ -215,6 +201,27 @@ export const usersSlice = createSlice({
         state.users = filteredUsers
       }
       state.isLoading = false
+    })
+
+    //updateUserProfile
+    builder.addCase(updateUserProfile.fulfilled, (state, action) => {
+      const { username, email, phone, address } = action.payload.payload
+
+      if (state.userData) {
+        state.userData.username = username
+        state.userData.email = email
+        state.userData.phone = phone
+        state.userData.address = address
+      }
+
+      localStorage.setItem(
+        'loginData',
+        JSON.stringify({
+          isLoggedin: state.isLoggedin,
+          userData: state.userData
+        })
+      )
+      // }
     })
 
     //banUser
@@ -275,12 +282,13 @@ export const usersSlice = createSlice({
     builder.addMatcher(
       (action) => action.type.endsWith('/rejected'),
       (state, action) => {
-        state.error = action.error.message || 'An Error has occured'
+        console.log('rejected', action.payload)
+        state.error = action.payload || 'An Error has occured'
         state.isLoading = false
       }
     )
   }
 })
 
-export const { searchUser, editProfile } = usersSlice.actions
+export const { searchUser, clearError } = usersSlice.actions
 export default usersSlice.reducer

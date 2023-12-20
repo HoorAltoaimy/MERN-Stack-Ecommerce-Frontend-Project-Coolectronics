@@ -54,8 +54,8 @@ const Register = () => {
     formData.append('address', user.address)
 
 
-    if (user.username.length < 2) {
-      setValidation('Username should be at least 2 characters')
+    if (user.username.length < 3) {
+      setValidation('Username should be at least 3 characters')
       return
     }
     if (user.email.length < 10) {

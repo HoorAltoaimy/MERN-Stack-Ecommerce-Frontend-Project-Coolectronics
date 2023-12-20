@@ -3,10 +3,10 @@ import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 
 import useUserState from '../../hooks/useUsersState'
-import { editProfile } from '../../redux/slices/users/userSlice'
 import { AppDispatch } from '../../redux/store'
 
 import AdminSidebar from '../../components/adminComponents/AdminSidebar'
+import { updateUserProfile } from '../../redux/slices/users/userSlice'
 
 const AdminDashboard = () => {
   const { userData } = useUserState()
@@ -38,7 +38,7 @@ const AdminDashboard = () => {
       return
     }
 
-    dispatch(editProfile(editUserData))
+    dispatch(updateUserProfile(editUserData))
     toast.success('Updated successfully')
   }
 

@@ -15,6 +15,13 @@ export type User = {
   isBanned: boolean
 }
 
+type ResetData = {
+  password: string
+  token: string
+}
+
+export type UpdatedUserType = Omit<User, '_id' | 'image'>
+
 export type UsersState = {
   users: User[]
   error: null | string
@@ -48,35 +55,45 @@ export const fetchUsers = createAsyncThunk('users/fetchUsers', async () => {
     }
     return response.data
   } catch (error) {
-    throw new Error('Failed to fetch users')
-  }
-})
-
-export const createUser = createAsyncThunk('users/createUser', async (newUser: FormData) => {
-  try {
-    const response = await axios.post(`${baseURL}/users/process-register`, newUser)
-    if (!response) {
-      throw new Error('No response')
-    }
-    return response.data
-  } catch (error) {
     if (axios.isAxiosError(error)) {
-      throw new Error('Failed to create new user')
+      throw new Error(error.response?.data.msg)
     }
   }
 })
 
-export const activateUser = createAsyncThunk('users/activateUser', async (token: string) => {
-  try {
-    const response = await axios.post(`${baseURL}/users/activate`, { token })
-    if (!response) {
-      throw new Error('No response')
+export const createUser = createAsyncThunk(
+  'users/createUser',
+  async (newUser: FormData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${baseURL}/users/process-register`, newUser)
+      if (!response) {
+        throw new Error('No response')
+      }
+      return response.data
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data.msg)
+      }
     }
-    return response.data
-  } catch (error) {
-    throw new Error('Failed to activate the user')
   }
-})
+)
+
+export const activateUser = createAsyncThunk(
+  'users/activateUser',
+  async (token: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${baseURL}/users/activate`, { token })
+      if (!response) {
+        throw new Error('No response')
+      }
+      return response.data
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data.msg)
+      }
+    }
+  }
+)
 
 export const deleteUser = createAsyncThunk(
   'users/deleteUser',
@@ -91,16 +108,15 @@ export const deleteUser = createAsyncThunk(
       if (axios.isAxiosError(error)) {
         return rejectWithValue(error.response?.data.msg)
       }
-      //throw new Error('Failed to delete user')
     }
   }
 )
 
 export const updateUserProfile = createAsyncThunk(
   'users/updateUserProfile',
-  async (userData: object, { rejectWithValue }) => {
+  async (userData: User, { rejectWithValue }) => {
     try {
-      const response = await axios.put<User[]>(
+      const response = await axios.put(
         `${baseURL}/users/update-user-info/${userData._id}`,
         userData
       )
@@ -117,41 +133,56 @@ export const updateUserProfile = createAsyncThunk(
   }
 )
 
-export const banUser = createAsyncThunk('users/banUser', async (id: string) => {
-  try {
-    const response = await axios.put(`${baseURL}/users/ban/${id}`)
-    if (!response) {
-      throw new Error('No response')
+export const banUser = createAsyncThunk(
+  'users/banUser',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`${baseURL}/users/ban/${id}`)
+      if (!response) {
+        throw new Error('No response')
+      }
+      return id
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data.msg)
+      }
     }
-    return id
-  } catch (error) {
-    throw new Error('Failed to ban user')
   }
-})
+)
 
-export const unbanUser = createAsyncThunk('users/unbanUser', async (id: string) => {
-  try {
-    const response = await axios.put(`${baseURL}/users/unban/${id}`)
-    if (!response) {
-      throw new Error('No response')
+export const unbanUser = createAsyncThunk(
+  'users/unbanUser',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`${baseURL}/users/unban/${id}`)
+      if (!response) {
+        throw new Error('No response')
+      }
+      return id
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data.msg)
+      }
     }
-    return id
-  } catch (error) {
-    throw new Error('Failed to unban user')
   }
-})
+)
 
-export const loginUser = createAsyncThunk('users/loginUser', async (user: object) => {
-  try {
-    const response = await axios.post(`${baseURL}/auth/login`, user)
-    if (!response) {
-      throw new Error('No response')
+export const loginUser = createAsyncThunk(
+  'users/loginUser',
+  async (user: object, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${baseURL}/auth/login`, user)
+      if (!response) {
+        throw new Error('No response')
+      }
+      return response.data
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data.msg)
+      }
     }
-    return response.data
-  } catch (error) {
-    throw new Error('Failed to login')
   }
-})
+)
 
 export const logoutUser = createAsyncThunk('users/logoutUser', async () => {
   try {
@@ -161,9 +192,48 @@ export const logoutUser = createAsyncThunk('users/logoutUser', async () => {
     }
     return response.data
   } catch (error) {
-    throw new Error('Failed to login')
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data.msg)
+    }
   }
 })
+
+export const forgetPassword = createAsyncThunk(
+  'users/forgetPassword',
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${baseURL}/users/forget-password`, { email })
+      if (!response) {
+        throw new Error('No response')
+      }
+      return response.data
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data.msg)
+      }
+    }
+  }
+)
+
+export const resetPassword = createAsyncThunk(
+  'users/resetPassword',
+  async (data: ResetData, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`${baseURL}/users/reset-password`, {
+        password: data.password,
+        token: data.token
+      })
+      if (!response) {
+        throw new Error('No response')
+      }
+      return response.data
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data.msg)
+      }
+    }
+  }
+)
 
 export const usersSlice = createSlice({
   name: 'users',

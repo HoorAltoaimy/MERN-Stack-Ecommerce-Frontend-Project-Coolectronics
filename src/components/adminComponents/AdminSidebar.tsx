@@ -10,7 +10,13 @@ const AdminSidebar = () => {
     <aside className="sidebar">
       <div className="admin-profile">
         <div className="admin-info">
-          <h3>Admin Profile</h3>
+          <ul className="admin-routes">
+            <li>
+              <Link to="/admin/adminDashboard">
+                <h3>Admin Profile</h3>
+              </Link>
+            </li>
+          </ul>
         </div>
         <div className="admin-info">
           <FaUser />

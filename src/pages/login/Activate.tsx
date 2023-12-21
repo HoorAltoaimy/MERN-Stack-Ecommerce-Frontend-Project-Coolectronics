@@ -66,7 +66,6 @@ const Activate = () => {
   }
 
   return (
-    //! css is required
     <div className="user-body">
       <div className="login-div">
         {decoded ? (

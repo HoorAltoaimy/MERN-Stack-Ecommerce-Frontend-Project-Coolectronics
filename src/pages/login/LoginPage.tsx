@@ -4,19 +4,31 @@ import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
 import useUsersState from '../../hooks/useUsersState'
-//import { login } from '../../redux/slices/users/userSlice'
 import { AppDispatch } from '../../redux/store'
-import { loginUser } from '../../redux/slices/users/userSlice'
-import UserProfile from '../user/UserProfile'
+import { clearError, loginUser } from '../../redux/slices/users/userSlice'
+import axios from 'axios'
 
-const LoginPage = ({pathName = ''}: {pathName: string}) => {
-  const { users, userData } = useUsersState()
+const LoginPage = ({ pathName = '' }: { pathName: string }) => {
+  const { userData, error } = useUsersState()
 
   const navigate = useNavigate()
 
   const [user, setUser] = useState({ email: '', password: '' })
 
   const dispatch: AppDispatch = useDispatch()
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error, {
+        onClose: () => dispatch(clearError()),
+        position: 'top-right',
+        autoClose: 3000,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      })
+    }
+  }, [error])
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
@@ -34,54 +46,23 @@ const LoginPage = ({pathName = ''}: {pathName: string}) => {
       )
     }
   }, [userData, navigate, pathName])
-  
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
 
     try {
       dispatch(loginUser(user))
-      // console.log(userData)
-      // console.log(`${userData?.isAdmin ? '/admin/adminDashboard' : '/user/UserProfile'}`)
-            // navigate(`${userData?.isAdmin ? '/admin/adminDashboard' : '/user/UserProfile'}`)
-
-      // const userFound = users.find(
-      //   (userData) => userData.email === user.email && userData.password === user.password
-      // )
-
-      // if (!userFound) {
-      //   toast.error('Wrong email or password')
-      //   setUser({
-      //     email: '',
-      //     password: ''
-      //   })
-      //   return
-      // }
-      // if (userFound.isBanned) {
-      //   toast.error('You are blocked!')
-      //   setUser({
-      //     email: '',
-      //     password: ''
-      //   })
-      //   return
-      // }
-      // if (userFound) {
-      //   dispatch(login(userFound))
-      //   if (userFound.isAdmin) {
-      //     navigate('/admin/adminDashboard')
-      //   }
-      //   else{
-      //     navigate('/user/userProfile')
-      //   }
-      // }
     } catch (error) {
-      console.log(error)
+      if (axios.isAxiosError(error)) {
+        toast.error(error?.response?.data.message, {
+          position: 'top-right',
+          autoClose: 3000,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        })
+      }
     }
-
-    // setUser({
-    //   email: '',
-    //   password: ''
-    // })
   }
 
   return (
@@ -113,7 +94,10 @@ const LoginPage = ({pathName = ''}: {pathName: string}) => {
           </button>
 
           <p>
-            Do not have an account? <Link to="/register">Register here</Link>
+            Forgot your password? <Link to="/users/forget-password">Reset</Link>
+          </p>
+          <p>
+            Do not have an account? <Link to="/register">Register</Link>
           </p>
         </form>
       </div>

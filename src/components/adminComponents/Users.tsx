@@ -1,6 +1,7 @@
 import { ChangeEvent, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
+import axios from 'axios'
 
 import useUsersState from '../../hooks/useUsersState'
 import {
@@ -16,10 +17,9 @@ import { AppDispatch } from '../../redux/store'
 
 import Search from '../products/Search'
 import AdminSidebar from './AdminSidebar'
-import axios from 'axios'
 
 const Users = () => {
-  const { users, isLoading, error, searchInput } = useUsersState()
+  const { users, error, searchInput } = useUsersState()
 
   const dispatch: AppDispatch = useDispatch()
 

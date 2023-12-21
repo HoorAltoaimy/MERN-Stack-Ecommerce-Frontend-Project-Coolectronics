@@ -31,7 +31,7 @@ const AdminDashboard = () => {
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    const editUserData = { id: userData?._id, ...user }
+    const editUserData = { _id: userData?._id, ...user }
 
     if (user.username && user.username.length < 3) {
       setValidation('Username should be at least 3 characters')
@@ -51,10 +51,13 @@ const AdminDashboard = () => {
       <AdminSidebar />
       <div className="admin-main-content">
         <div className="admin-info">
-          <p>{userData?.username}</p>
+          <p>ID: {userData?._id}</p>
         </div>
         <div className="admin-info">
-          <p>{userData?.email}</p>
+          <p>Username: {userData?.username}</p>
+        </div>
+        <div className="admin-info">
+          <p>Email: {userData?.email}</p>
         </div>
         <button className="btn" onClick={handleFormOpen}>
           Edit
@@ -70,7 +73,9 @@ const AdminDashboard = () => {
                 id="username"
                 value={user.username}
                 onChange={handleChange}
+                required
               />
+              <p className="form-validation">{validation}</p>
 
               <button className="btn" type="submit">
                 Save

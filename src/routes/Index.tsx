@@ -18,7 +18,9 @@ import UserProfile from '../pages/user/UserProfile'
 
 import AdminProtectedRoutes from './AdminProtectedRout'
 import UserProtectedRoutes from './UserProtectedRoutes'
-import Activate from '../pages/user/Activate'
+import Activate from '../pages/login/Activate'
+import ForgetPassword from '../pages/login/ForgetPassword'
+import ResetPassword from '../pages/login/ResetPassword'
 
 const Index = () => {
   return (
@@ -28,13 +30,14 @@ const Index = () => {
         <Route path="/" element={<Home />} />
         <Route path="/productDetails/:idNumber" element={<ProductDetails />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/login" element={<LoginPage pathName='' />} />
+        <Route path="/login" element={<LoginPage pathName="" />} />
         <Route path="/logout" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/users/activate/:token" element={<Activate />} />
+        <Route path="/users/forget-password" element={<ForgetPassword />} />
+        <Route path="/users/reset-password/:token" element={<ResetPassword />} />
 
         <Route path="/admin" element={<AdminProtectedRoutes />}>
-        {/* <Route path="/admin"> */}
           <Route path="adminDashboard" element={<AdminDashboard />} />
           <Route path="adminDashboard/categories" element={<Categories />} />
           <Route path="adminDashboard/products" element={<Products />} />
@@ -43,7 +46,7 @@ const Index = () => {
         </Route>
 
         <Route path="/user" element={<UserProtectedRoutes />}>
-        <Route path="userProfile" element={<UserProfile />} />
+          <Route path="userProfile" element={<UserProfile />} />
         </Route>
 
         <Route path="/*" element={<Error />} />

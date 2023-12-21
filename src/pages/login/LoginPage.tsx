@@ -1,12 +1,12 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
+import axios from 'axios'
 
 import useUsersState from '../../hooks/useUsersState'
 import { AppDispatch } from '../../redux/store'
-import { clearError, loginUser } from '../../redux/slices/users/userSlice'
-import axios from 'axios'
+import { loginUser } from '../../redux/slices/users/userSlice'
+import showToast from '../../utils/toastUtils'
 
 const LoginPage = ({ pathName = '' }: { pathName: string }) => {
   const { userData, error } = useUsersState()
@@ -19,14 +19,7 @@ const LoginPage = ({ pathName = '' }: { pathName: string }) => {
 
   useEffect(() => {
     if (error) {
-      toast.error(error, {
-        onClose: () => dispatch(clearError()),
-        position: 'top-right',
-        autoClose: 3000,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
-      })
+      showToast('error', error)
     }
   }, [error])
 
@@ -54,13 +47,7 @@ const LoginPage = ({ pathName = '' }: { pathName: string }) => {
       dispatch(loginUser(user))
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        toast.error(error?.response?.data.message, {
-          position: 'top-right',
-          autoClose: 3000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        })
+        showToast('error', error?.response?.data.message)
       }
     }
   }

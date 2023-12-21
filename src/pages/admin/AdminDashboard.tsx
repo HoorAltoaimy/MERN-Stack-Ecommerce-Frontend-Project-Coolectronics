@@ -1,12 +1,11 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { toast } from 'react-toastify'
 
 import useUserState from '../../hooks/useUsersState'
 import { AppDispatch } from '../../redux/store'
-
 import AdminSidebar from '../../components/adminComponents/AdminSidebar'
 import { updateUserProfile } from '../../redux/slices/users/userSlice'
+import showToast from '../../utils/toastUtils'
 
 const AdminDashboard = () => {
   const { userData } = useUserState()
@@ -14,14 +13,13 @@ const AdminDashboard = () => {
   const [isFormOpen, setIsFormOpen] = useState(false)
 
   const [user, setUser] = useState({
-    username: userData?.username
+    username: userData?.username || ''
   })
 
   const [validation, setValidation] = useState('')
 
   const dispatch: AppDispatch = useDispatch()
 
-  //Edit admin profile
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
     setUser((prevUser) => {
@@ -31,7 +29,7 @@ const AdminDashboard = () => {
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    const editUserData = { _id: userData?._id, ...user }
+    const editUserData = { _id: userData?._id || '', ...user }
 
     if (user.username && user.username.length < 3) {
       setValidation('Username should be at least 3 characters')
@@ -39,7 +37,7 @@ const AdminDashboard = () => {
     }
 
     dispatch(updateUserProfile(editUserData))
-    toast.success('Updated successfully')
+    showToast('success', 'Updated successfully')
   }
 
   const handleFormOpen = () => {

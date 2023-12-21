@@ -1,11 +1,13 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import jwtDecode from 'jwt-decode'
 import axios from 'axios'
-import { toast } from 'react-toastify'
 
 import { activateUser } from '../../redux/slices/users/userSlice'
 import { AppDispatch } from '../../redux/store'
 import { useDispatch } from 'react-redux'
+import showToast from '../../utils/toastUtils'
+import { useEffect } from 'react'
+import useUsersState from '../../hooks/useUsersState'
 
 interface DecodedToken {
   username: string
@@ -17,6 +19,8 @@ interface DecodedToken {
 }
 
 const Activate = () => {
+  const { error } = useUsersState()
+
   const {token} = useParams()
 
   // Check if token is undefined before decoding
@@ -26,6 +30,12 @@ const Activate = () => {
 
   const navigate = useNavigate()
 
+    useEffect(() => {
+      if (error) {
+        showToast('error', error)
+      }
+    }, [error])
+
   const handleActivate = async () => {
     try {
       if (token) {
@@ -33,34 +43,13 @@ const Activate = () => {
         const response = await dispatch(activateUser(token))
 
         if (response.meta.requestStatus === 'fulfilled') {
-          toast.success('New user created successfully', {
-            position: 'top-right',
-            autoClose: 3000,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true
-          })
+          showToast('success', 'New user created successfully')
           navigate('/login')
-        }
-        if (response.meta.requestStatus === 'rejected') {
-          toast.error('Unable to create new user', {
-            position: 'top-right',
-            autoClose: 3000,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true
-          })
         }
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        toast.error(error?.response?.data.message, {
-          position: 'top-right',
-          autoClose: 3000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        })
+        showToast('error', error?.response?.data.message)
       }
     }
   }

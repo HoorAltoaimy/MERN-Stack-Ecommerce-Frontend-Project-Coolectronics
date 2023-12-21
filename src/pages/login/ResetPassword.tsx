@@ -1,12 +1,12 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
 import { useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 
 import useUsersState from '../../hooks/useUsersState'
 import { AppDispatch } from '../../redux/store'
 import { useDispatch } from 'react-redux'
-import { clearError, resetPassword } from '../../redux/slices/users/userSlice'
+import { resetPassword } from '../../redux/slices/users/userSlice'
+import showToast from '../../utils/toastUtils'
 
 const ResetPassword = () => {
   const { error } = useUsersState()
@@ -21,14 +21,7 @@ const ResetPassword = () => {
 
   useEffect(() => {
     if (error) {
-      toast.error(error, {
-        onClose: () => dispatch(clearError()),
-        position: 'top-right',
-        autoClose: 3000,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
-      })
+      showToast('error', error)
     }
   }, [error])
 
@@ -40,27 +33,17 @@ const ResetPassword = () => {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     try {
-      const response = await dispatch(resetPassword({ password, token }))
+      if (token) {
+        const response = await dispatch(resetPassword({ password, token }))
 
-      if (response.meta.requestStatus === 'fulfilled') {
-        toast.success('Password reseted successfully', {
-          position: 'top-right',
-          autoClose: 3000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        })
-        navigate('/login')
+        if (response.meta.requestStatus === 'fulfilled') {
+          showToast('success', 'Password reseted successfully')
+          navigate('/login')
+        }
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        toast.error(error?.response?.data.message, {
-          position: 'top-right',
-          autoClose: 3000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        })
+        showToast('error', error?.response?.data.message)
       }
     }
   }

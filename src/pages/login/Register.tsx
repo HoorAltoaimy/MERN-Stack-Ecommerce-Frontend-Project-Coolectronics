@@ -1,12 +1,10 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { useDispatch } from 'react-redux'
-//import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
 import axios from 'axios'
 
 import { AppDispatch } from '../../redux/store'
 import { createUser } from '../../redux/slices/users/userSlice'
-//import { createUser } from '../../services/userServices'
+import showToast from '../../utils/toastUtils'
 
 const Register = () => {
   const [user, setUser] = useState({
@@ -23,8 +21,6 @@ const Register = () => {
   const [validation, setValidation] = useState('')
 
   const dispatch: AppDispatch = useDispatch()
-
-  //const navigate = useNavigate()
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const {name, type} = event.target
@@ -79,32 +75,11 @@ const Register = () => {
       const response = await dispatch(createUser(formData))
      
       if (response.meta.requestStatus === 'fulfilled') {
-        toast.success('Check your email for activation', {
-          position: 'top-right',
-          autoClose: 3000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        })
-      }
-      if (response.meta.requestStatus === 'rejected') {
-        toast.error('Unable to create new user', {
-          position: 'top-right',
-          autoClose: 3000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        })
+        showToast('success', 'Check your email for activation')
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        toast.error(error?.response?.data.message, {
-          position: 'top-right',
-          autoClose: 3000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        })
+        showToast('error', error?.response?.data.message)
       }
     }
   }

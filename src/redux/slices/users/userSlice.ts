@@ -20,7 +20,13 @@ type ResetData = {
   token: string
 }
 
-export type UpdatedUserType = Omit<User, '_id' | 'image'>
+export type UpdatedUserType = {
+  _id: string
+  username: string
+  email?: string
+  address?: string
+  phone?: string
+}
 
 export type UsersState = {
   users: User[]
@@ -114,7 +120,7 @@ export const deleteUser = createAsyncThunk(
 
 export const updateUserProfile = createAsyncThunk(
   'users/updateUserProfile',
-  async (userData: User, { rejectWithValue }) => {
+  async (userData: UpdatedUserType, { rejectWithValue }) => {
     try {
       const response = await axios.put(
         `${baseURL}/users/update-user-info/${userData._id}`,
@@ -352,7 +358,6 @@ export const usersSlice = createSlice({
     builder.addMatcher(
       (action) => action.type.endsWith('/rejected'),
       (state, action) => {
-        console.log('rejected', action.payload)
         state.error = action.payload || 'An Error has occured'
         state.isLoading = false
       }

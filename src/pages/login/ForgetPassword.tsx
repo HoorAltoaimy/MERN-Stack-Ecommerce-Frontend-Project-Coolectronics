@@ -1,11 +1,11 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
+import axios from 'axios'
 
-import { clearError, forgetPassword } from '../../redux/slices/users/userSlice'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import useUsersState from '../../hooks/useUsersState'
-import axios from 'axios'
+import showToast from '../../utils/toastUtils'
+import { forgetPassword } from '../../redux/slices/users/userSlice'
 
 const ForgetPassword = () => {
   const { error } = useUsersState()
@@ -16,14 +16,7 @@ const ForgetPassword = () => {
 
   useEffect(() => {
     if (error) {
-      toast.error(error, {
-        onClose: () => dispatch(clearError()),
-        position: 'top-right',
-        autoClose: 3000,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
-      })
+     showToast('error', error)
     }
   }, [error])
 
@@ -38,23 +31,12 @@ const ForgetPassword = () => {
       const response = await dispatch(forgetPassword(email))
 
       if (response.meta.requestStatus === 'fulfilled') {
-        toast.success('Check your email to reset ', {
-          position: 'top-right',
-          autoClose: 3000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        })
+        showToast('success', 'Check your email to reset')
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        toast.error(error?.response?.data.message, {
-          position: 'top-right',
-          autoClose: 3000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        })
+
+        showToast('error', error?.response?.data.message)
       }
     }
   }

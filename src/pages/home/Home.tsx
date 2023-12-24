@@ -130,6 +130,7 @@ const Home = () => {
     pageNumbers.push(
       <button
         className="pagination"
+        key={i}
         onClick={() => {
           handlePageChange(i)
         }}>

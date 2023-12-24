@@ -4,34 +4,32 @@ import { useDispatch } from 'react-redux'
 import { Link, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
-//import useCategoriesState from '../../hooks/useCategoriesState'
+import useCategoriesState from '../../hooks/useCategoriesState'
 import useProductsState from '../../hooks/useProductsState'
 import { addToCart } from '../../redux/slices/cart/cartSlice'
-import { Product, fetchProducts, fetchSingleProduct } from '../../redux/slices/products/productsSlice'
+import { Product, fetchSingleProduct } from '../../redux/slices/products/productsSlice'
 import { AppDispatch } from '../../redux/store'
 
 const ProductDetails = () => {
   const { singleProduct } = useProductsState()
-  console.log(singleProduct)
 
-  //const { categories } = useCategoriesState()
+  const { categories } = useCategoriesState()
 
   const { productSlug } = useParams() //getting the product id from the path
 
   const dispatch: AppDispatch = useDispatch()
 
   useEffect(() => {
-    // if (productSlug) {
-    //   dispatch(fetchProducts()).then(() => dispatch(fetchSingleProduct(singleProduct.slug)))
-    // }
-    dispatch(fetchSingleProduct(singleProduct.slug))
-  }, [dispatch]) //productSlug
+    if (productSlug) {
+      dispatch(fetchSingleProduct(productSlug))
+    }
+  }, [dispatch, productSlug]) 
 
-  // const getCategoryName = (id: number) => {
-  //   const categoryFound = categories.find((category) => category._id === id)
+  const getCategoryName = (id: string) => {
+    const categoryFound = categories.find((category) => category._id === id)
 
-  //   return categoryFound ? categoryFound.title + '. ' : 'No category assigned'
-  // }
+    return categoryFound ? categoryFound.title : 'No category assigned'
+  }
 
   const handleAddToCart = (product: Product) => {
     toast.success('Added to cart successfully')
@@ -62,8 +60,9 @@ const ProductDetails = () => {
             <div className="product-info">
               <h2>{singleProduct.title}</h2>
               <p>Description: {singleProduct.description}</p>
-              <p>Category:{singleProduct.category}</p>
+              <p>Category: {getCategoryName(singleProduct.category)}</p>
               <p>Price: {singleProduct.price} SAR</p>
+              <p>Shipping: {singleProduct.shipping} SAR</p>
               <div className="div-btn">
                 <button
                   className="btn"

@@ -62,8 +62,7 @@ export const fetchSingleProduct = createAsyncThunk('products/fetchSingleProduct'
     if (!response) {
       throw new Error('No response')
     }
-    console.log(response.data)
-    return response.data
+    return response.data.payload
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw new Error(error.response?.data.msg)
@@ -188,11 +187,7 @@ export const productsSlice = createSlice({
 
     //fetchSingleProduct
     builder.addCase(fetchSingleProduct.fulfilled, (state, action) => {
-      const slug = action.payload
-      const productFound = state.products.find((product) => product.slug === slug)
-      if (productFound) {
-        state.singleProduct = productFound
-      }
+      state.singleProduct = action.payload
     })
 
     //createProduct
@@ -202,7 +197,8 @@ export const productsSlice = createSlice({
 
     //updateProduct
     builder.addCase(updateProduct.fulfilled, (state, action) => {
-      const { _id, title, image, description, category, price, quantity, shipping } = action.payload.payload
+      const { _id, title, image, description, category, price, quantity, shipping } =
+        action.payload.payload
       const productFound = state.products.find((product) => product._id === _id)
       if (productFound) {
         productFound.title = title
@@ -215,7 +211,7 @@ export const productsSlice = createSlice({
       }
     })
 
-    //deleteUser
+    //deleteProduct
     builder.addCase(deleteProduct.fulfilled, (state, action) => {
       const id = action.payload
       const filteredProducts = state.products.filter((product) => product._id !== id)
@@ -244,6 +240,5 @@ export const productsSlice = createSlice({
   }
 })
 
-export const { searchProduct, sortProducts, editProduct } =
-  productsSlice.actions
+export const { searchProduct, sortProducts } = productsSlice.actions
 export default productsSlice.reducer

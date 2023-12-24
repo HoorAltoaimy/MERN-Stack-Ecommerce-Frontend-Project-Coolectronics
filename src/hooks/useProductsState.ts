@@ -2,7 +2,7 @@ import { useSelector } from "react-redux"
 import { RootState } from "../redux/store"
 
 const useProductsState = () => {
-    const { products, isLoading, error, searchInput, singleProduct } = useSelector(
+    const { products, isLoading, error, searchInput, singleProduct, pagination } = useSelector(
       (state: RootState) => state.productsReducer
     )
     return {
@@ -10,7 +10,8 @@ const useProductsState = () => {
       isLoading,
       error,
       searchInput,
-      singleProduct
+      singleProduct,
+      pagination
     }
 }
 

@@ -6,6 +6,7 @@ import { AppDispatch } from '../../redux/store'
 import AdminSidebar from '../../components/adminComponents/AdminSidebar'
 import { updateUserProfile } from '../../redux/slices/users/userSlice'
 import showToast from '../../utils/toastUtils'
+import axios from 'axios'
 
 const AdminDashboard = () => {
   const { userData } = useUserState()
@@ -13,7 +14,9 @@ const AdminDashboard = () => {
   const [isFormOpen, setIsFormOpen] = useState(false)
 
   const [user, setUser] = useState({
-    username: userData?.username || ''
+    username: userData?.username || '',
+    email: userData?.email || '',
+    image: userData?.image || ''
   })
 
   const [validation, setValidation] = useState('')
@@ -29,15 +32,25 @@ const AdminDashboard = () => {
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    const editUserData = { _id: userData?._id || '', ...user }
+    try {
+      const editUserData = { _id: userData?._id || '', ...user }
 
-    if (user.username && user.username.length < 3) {
-      setValidation('Username should be at least 3 characters')
-      return
+      if (user.username && user.username.length < 3) {
+        setValidation('Username should be at least 3 characters')
+        return
+      }
+      if (user.email && user.email.length < 10) {
+        setValidation('Pleas provide a valid email')
+        return
+      }
+
+      dispatch(updateUserProfile(editUserData))
+      showToast('success', 'Updated successfully')
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        showToast('error', error?.response?.data.message)
+      }
     }
-
-    dispatch(updateUserProfile(editUserData))
-    showToast('success', 'Updated successfully')
   }
 
   const handleFormOpen = () => {
@@ -70,6 +83,26 @@ const AdminDashboard = () => {
                 name="username"
                 id="username"
                 value={user.username}
+                onChange={handleChange}
+                required
+              />
+
+              <label htmlFor="email">Email:</label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                value={user.email}
+                onChange={handleChange}
+                required
+              />
+
+              <label htmlFor="image">Image:</label>
+              <input
+                type="file"
+                name="image"
+                id="image"
+                accept="image/*"
                 onChange={handleChange}
                 required
               />

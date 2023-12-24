@@ -1,23 +1,13 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
-import { baseURL } from '../users/userSlice'
 
 export type Category = {
   _id: string
   title: string
   slug: string
-  createdAt?: string
-  updatedAt: string
-  __v: number
-}
-
-export type NewCategory = {
-  title: string
-}
-
-export type EditedCategoryType = {
-  _id: string
-  title: string
+  // createdAt: string
+  // updatedAt: string
+  // __v: number
 }
 
 export type CategoriesState = {
@@ -25,6 +15,7 @@ export type CategoriesState = {
   error: null | string
   isLoading: boolean
   category: null | Category
+  status: null | string
 }
 
 const categoryData =
@@ -36,26 +27,31 @@ const initialState: CategoriesState = {
   categories: [],
   error: null,
   isLoading: false,
-  category: categoryData.category
+  category: categoryData.category,
+  status: null
 }
+
+const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL
 
 export const fetchCategories = createAsyncThunk('categories/fetchCategories', async () => {
   try {
-    const response = await axios.get(`${baseURL}/categories`)
+    const response = await axios.get(`${API_BASE_URL}/categories`)
     if (!response) {
       throw new Error('Network erroe')
     }
-    return response.data.payload
+    return response.data
   } catch (error) {
-    console.log(error)
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data.msg)
+    }
   }
 })
 
 export const createCategory = createAsyncThunk(
   'categories/createCategory',
-  async (newCategory: NewCategory) => {
+  async (newCategory: string, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${baseURL}/categories`, newCategory)
+      const response = await axios.post(`${API_BASE_URL}/categories`, {title: newCategory}) 
 
       if (!response) {
         throw new Error('Network erroe')
@@ -63,7 +59,7 @@ export const createCategory = createAsyncThunk(
       return response.data
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.log(error.response?.data.message)
+        return rejectWithValue(error.response?.data.msg)
       }
     }
   }
@@ -71,33 +67,40 @@ export const createCategory = createAsyncThunk(
 
 export const editCategory = createAsyncThunk(
   'categories/editCategory',
-  async (editedCategoryData: EditedCategoryType) => {
+  async (editedCategoryData: Partial<Category>, { rejectWithValue }) => {
     try {
       const response = await axios.put(
-        `${baseURL}/categories/${editedCategoryData._id}`,
-        editedCategoryData
+        `${API_BASE_URL}/categories/${editedCategoryData._id}`,
+        {title: editedCategoryData.title}
       )
       if (!response) {
         throw new Error('Network erroe')
       }
       return response.data
     } catch (error) {
-      console.log(error)
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data.msg)
+      }
     }
   }
 )
 
-export const deleteCategory = createAsyncThunk('categories/deleteCategory', async (id: string) => {
-  try {
-    const response = await axios.delete(`${baseURL}/categories/${id}`)
-    if (!response) {
-      throw new Error('Network erroe')
+export const deleteCategory = createAsyncThunk(
+  'categories/deleteCategory',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.delete(`${API_BASE_URL}/categories/${id}`)
+      if (!response) {
+        throw new Error('Network erroe')
+      }
+      return id
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data.msg)
+      }
     }
-    return id
-  } catch (error) {
-    console.log(error)
   }
-})
+)
 
 export const categoriesSlice = createSlice({
   name: 'categories',
@@ -106,13 +109,14 @@ export const categoriesSlice = createSlice({
   extraReducers(builder) {
     //fetchCategories
     builder.addCase(fetchCategories.fulfilled, (state, action) => {
-      state.categories = action.payload
-      state.isLoading = false
+      state.categories = action.payload.payload
+      state.status = action.payload.message
     })
 
     // createCategory
     builder.addCase(createCategory.fulfilled, (state, action) => {
       state.categories.push(action.payload.payload)
+      state.status = action.payload.message
     })
 
     //deleteCategory

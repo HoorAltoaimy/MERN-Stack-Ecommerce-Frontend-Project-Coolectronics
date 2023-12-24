@@ -1,13 +1,11 @@
 import { ChangeEvent, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
-import { toast } from 'react-toastify'
 import axios from 'axios'
 
 import useUsersState from '../../hooks/useUsersState'
 import {
   User,
   banUser,
-  clearError,
   deleteUser,
   fetchUsers,
   searchUser,
@@ -17,6 +15,7 @@ import { AppDispatch } from '../../redux/store'
 
 import Search from '../products/Search'
 import AdminSidebar from './AdminSidebar'
+import showToast from '../../utils/toastUtils'
 
 const Users = () => {
   const { users, error, searchInput } = useUsersState()
@@ -25,14 +24,7 @@ const Users = () => {
 
   useEffect(() => {
     if (error) {
-      toast.error(error, {
-        onClose: () => dispatch(clearError()),
-        position: 'top-right',
-        autoClose: 3000,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
-      })
+      showToast('error', error)
     }
   }, [error])
 
@@ -56,23 +48,11 @@ const Users = () => {
       const response = await dispatch(deleteUser(id))
 
       if (response.meta.requestStatus === 'fulfilled') {
-        toast.success('User deleted successfully', {
-          position: 'top-right',
-          autoClose: 3000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        })
+        showToast('success', 'User deleted successfully')
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        toast.error(error?.response?.data.message, {
-          position: 'top-right',
-          autoClose: 3000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        })
+        showToast('error', error?.response?.data.message)
       }
     }
   }
@@ -82,26 +62,14 @@ const Users = () => {
       const response = isBanned ? await dispatch(unbanUser(id)) : await dispatch(banUser(id))
 
       if (response.meta.requestStatus === 'fulfilled') {
-        toast.success('User ban status updated successfully', {
-          position: 'top-right',
-          autoClose: 3000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        })
+        showToast('success', 'User ban status updated successfully')
       }
       if (response.meta.requestStatus === 'rejected') {
-        toast.error('Unable to update the ban status of this user', {
-          position: 'top-right',
-          autoClose: 3000,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
-        })
+        showToast('error', 'Unable to update the ban status of this user')
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        toast.error(error?.response?.data.message)
+        showToast('error', error?.response?.data.message)
       }
     }
   }

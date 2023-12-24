@@ -1,6 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { toast } from 'react-toastify'
 import axios from 'axios'
 
 import useCategoriesState from '../../hooks/useCategoriesState'
@@ -13,10 +12,12 @@ import {
 } from '../../redux/slices/categories/categoriesSlice'
 import { AppDispatch } from '../../redux/store'
 import AdminSidebar from './AdminSidebar'
+import showToast from '../../utils/toastUtils'
 
 
 const Categories = () => {
-  const { categories, isLoading, error } = useCategoriesState()
+  const { categories, error } = useCategoriesState()
+  console.log(categories)
 
   const [categoryName, setCategoryName] = useState('')
 
@@ -29,9 +30,14 @@ const Categories = () => {
   const dispatch: AppDispatch = useDispatch()
 
   useEffect(() => {
+    if (error) {
+      showToast('error', error)
+    }
+  }, [error])
+
+  useEffect(() => {
     dispatch(fetchCategories())
   }, [dispatch])
-  console.log(categories);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newCategoryName = event.target.value
@@ -58,17 +64,29 @@ const Categories = () => {
     }
     if (isEdit) {
       const editedCategoryData = { _id: editId, title: categoryName }
-      dispatch(editCategory(editedCategoryData))
+
+      try {
+        const response = await dispatch(editCategory(editedCategoryData))
+
+        if (response.meta.requestStatus === 'fulfilled') {
+          showToast('success', 'Category updated successfully')
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          showToast('error', error?.response?.data.message)
+        }
+      }
 
     } else {
       try {
-        const newCategory = { title: categoryName }
-        const response =  dispatch(createCategory(newCategory))
-        dispatch(fetchCategories())
-        console.log(response)
+        const response = await dispatch(createCategory(categoryName))
+        if (response.meta.requestStatus === 'fulfilled') {
+          showToast('success', 'New category created successfully')
+          dispatch(fetchCategories())
+        }        
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          console.log(error?.response?.data.message)
+          showToast('error', error?.response?.data.message)
         }
       }
     }
@@ -77,13 +95,15 @@ const Categories = () => {
     setValidation('')
   }
 
-  const handleDeleteCategory = (id: string) => {
+  const handleDeleteCategory = async (id: string) => {
     try {
-      dispatch(deleteCategory(id))
-      toast.success('Category deleted successfully')
+      const response = await dispatch(deleteCategory(id))
+      if (response.meta.requestStatus === 'fulfilled') {
+        showToast('success', 'Category deleted successfully')
+      }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.log(error?.response?.data.message)
+          showToast('error', error?.response?.data.message)
       }
     }
   }

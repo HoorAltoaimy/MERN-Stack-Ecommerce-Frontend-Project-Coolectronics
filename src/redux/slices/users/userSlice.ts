@@ -20,14 +20,6 @@ type ResetData = {
   token: string
 }
 
-export type UpdatedUserType = {
-  _id: string
-  username: string
-  email?: string
-  address?: string
-  phone?: string
-}
-
 export type UsersState = {
   users: User[]
   error: null | string
@@ -52,10 +44,11 @@ const initialState: UsersState = {
 }
 
 export const baseURL = 'http://localhost:5050/api'
+export const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL
 
 export const fetchUsers = createAsyncThunk('users/fetchUsers', async () => {
   try {
-    const response = await axios.get(`${baseURL}/users`) //get.<User[]>
+    const response = await axios.get(`${API_BASE_URL}/users`) //get.<User[]>
     if (!response) {
       throw new Error('No response')
     }
@@ -71,7 +64,7 @@ export const createUser = createAsyncThunk(
   'users/createUser',
   async (newUser: FormData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${baseURL}/users/process-register`, newUser)
+      const response = await axios.post(`${API_BASE_URL}/users/process-register`, newUser)
       if (!response) {
         throw new Error('No response')
       }
@@ -88,7 +81,7 @@ export const activateUser = createAsyncThunk(
   'users/activateUser',
   async (token: string, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${baseURL}/users/activate`, { token })
+      const response = await axios.post(`${API_BASE_URL}/users/activate`, { token })
       if (!response) {
         throw new Error('No response')
       }
@@ -105,7 +98,7 @@ export const deleteUser = createAsyncThunk(
   'users/deleteUser',
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await axios.delete<User[]>(`${baseURL}/users/${id}`)
+      const response = await axios.delete<User[]>(`${API_BASE_URL}/users/${id}`)
       if (!response) {
         throw new Error('No response')
       }
@@ -120,16 +113,16 @@ export const deleteUser = createAsyncThunk(
 
 export const updateUserProfile = createAsyncThunk(
   'users/updateUserProfile',
-  async (userData: UpdatedUserType, { rejectWithValue }) => {
+  async (userData: Partial<User>, { rejectWithValue }) => {
     try {
       const response = await axios.put(
-        `${baseURL}/users/update-user-info/${userData._id}`,
+        `${API_BASE_URL}/users/update-user-info/${userData._id}`,
         userData
       )
       if (!response) {
         throw new Error('No response')
       }
-      // return userData._id
+      console.log(response);
       return response.data
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -143,7 +136,7 @@ export const banUser = createAsyncThunk(
   'users/banUser',
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${baseURL}/users/ban/${id}`)
+      const response = await axios.put(`${API_BASE_URL}/users/ban/${id}`)
       if (!response) {
         throw new Error('No response')
       }
@@ -160,7 +153,7 @@ export const unbanUser = createAsyncThunk(
   'users/unbanUser',
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${baseURL}/users/unban/${id}`)
+      const response = await axios.put(`${API_BASE_URL}/users/unban/${id}`)
       if (!response) {
         throw new Error('No response')
       }
@@ -177,7 +170,7 @@ export const loginUser = createAsyncThunk(
   'users/loginUser',
   async (user: object, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${baseURL}/auth/login`, user)
+      const response = await axios.post(`${API_BASE_URL}/auth/login`, user)
       if (!response) {
         throw new Error('No response')
       }
@@ -192,7 +185,7 @@ export const loginUser = createAsyncThunk(
 
 export const logoutUser = createAsyncThunk('users/logoutUser', async () => {
   try {
-    const response = await axios.post(`${baseURL}/auth/logout`)
+    const response = await axios.post(`${API_BASE_URL}/auth/logout`)
     if (!response) {
       throw new Error('No response')
     }
@@ -208,7 +201,7 @@ export const forgetPassword = createAsyncThunk(
   'users/forgetPassword',
   async (email: string, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${baseURL}/users/forget-password`, { email })
+      const response = await axios.post(`${API_BASE_URL}/users/forget-password`, { email })
       if (!response) {
         throw new Error('No response')
       }
@@ -225,7 +218,7 @@ export const resetPassword = createAsyncThunk(
   'users/resetPassword',
   async (data: ResetData, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${baseURL}/users/reset-password`, {
+      const response = await axios.put(`${API_BASE_URL}/users/reset-password`, {
         password: data.password,
         token: data.token
       })

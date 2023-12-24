@@ -4,44 +4,46 @@ import { useDispatch } from 'react-redux'
 import { Link, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
-import useCategoriesState from '../../hooks/useCategoriesState'
+//import useCategoriesState from '../../hooks/useCategoriesState'
 import useProductsState from '../../hooks/useProductsState'
 import { addToCart } from '../../redux/slices/cart/cartSlice'
-import { Product, fetchProducts, showProductDetailes } from '../../redux/slices/products/productsSlice'
+import { Product, fetchProducts, fetchSingleProduct } from '../../redux/slices/products/productsSlice'
 import { AppDispatch } from '../../redux/store'
 
 const ProductDetails = () => {
-  const { singleProduct, isLoading, error } = useProductsState()
+  const { singleProduct } = useProductsState()
+  console.log(singleProduct)
 
-  const { categories } = useCategoriesState()
+  //const { categories } = useCategoriesState()
 
-  const { idNumber } = useParams() //getting the product id from the path
+  const { productSlug } = useParams() //getting the product id from the path
 
   const dispatch: AppDispatch = useDispatch()
 
   useEffect(() => {
-    if (idNumber) {
-      dispatch(fetchProducts()).then(() => dispatch(showProductDetailes(Number(idNumber))))
-    }
-  }, [dispatch, idNumber])
+    // if (productSlug) {
+    //   dispatch(fetchProducts()).then(() => dispatch(fetchSingleProduct(singleProduct.slug)))
+    // }
+    dispatch(fetchSingleProduct(singleProduct.slug))
+  }, [dispatch]) //productSlug
 
-  const getCategoryName = (id: number) => {
-    const categoryFound = categories.find((category) => category.id === id)
+  // const getCategoryName = (id: number) => {
+  //   const categoryFound = categories.find((category) => category._id === id)
 
-    return categoryFound ? categoryFound.name + '. ' : 'No category assigned'
-  }
+  //   return categoryFound ? categoryFound.title + '. ' : 'No category assigned'
+  // }
 
   const handleAddToCart = (product: Product) => {
-   toast.success('Added to cart successfully')
+    toast.success('Added to cart successfully')
     dispatch(addToCart(product))
   }
 
-  if (isLoading) {
-    return <p>Data is loading</p>
-  }
-  if (error) {
-    return <p>{error}</p>
-  }
+  // if (isLoading) {
+  //   return <p>Data is loading</p>
+  // }
+  // if (error) {
+  //   return <p>{error}</p>
+  // }
 
   return (
     <div className="product-detailes-body">
@@ -55,22 +57,12 @@ const ProductDetails = () => {
         {singleProduct && (
           <>
             <div className="product-img">
-              <img src={singleProduct.image} alt={singleProduct.name} width={300} height={300} />
+              <img src={singleProduct.image} alt={singleProduct.title} width={300} height={300} />
             </div>
             <div className="product-info">
-              <h2>{singleProduct.name}</h2>
+              <h2>{singleProduct.title}</h2>
               <p>Description: {singleProduct.description}</p>
-              <p>
-                Categories:{' '}
-                {singleProduct.categories &&
-                  singleProduct.categories.map((categoryId) => getCategoryName(categoryId))}
-              </p>
-              {singleProduct.variants && singleProduct.variants.length > 0 && (
-                <p>Variants: {singleProduct.variants && singleProduct.variants.join(', ')}</p>
-              )}
-              {singleProduct.sizes && singleProduct.sizes.length > 0 && (
-                <p>Sizes: {singleProduct.sizes && singleProduct.sizes.join(', ')}</p>
-              )}
+              <p>Category:{singleProduct.category}</p>
               <p>Price: {singleProduct.price} SAR</p>
               <div className="div-btn">
                 <button
@@ -80,7 +72,6 @@ const ProductDetails = () => {
                   }}>
                   Add to cart
                 </button>
-
               </div>
             </div>
           </>

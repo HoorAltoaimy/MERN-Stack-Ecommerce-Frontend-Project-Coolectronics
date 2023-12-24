@@ -1,11 +1,11 @@
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa'
 import { useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
 import { addToCart } from '../../redux/slices/cart/cartSlice'
-import { Product, searchProduct } from '../../redux/slices/products/productsSlice'
+import { Product, fetchProducts, searchProduct } from '../../redux/slices/products/productsSlice'
 import { AppDispatch } from '../../redux/store'
 
 import Search from '../../components/products/Search'
@@ -13,13 +13,18 @@ import SortProducts from '../../components/products/SortProducts'
 import useCategoriesState from '../../hooks/useCategoriesState'
 import useProductState from '../../hooks/useProductsState'
 import { prices } from '../../../public/mock/priceData/prices'
+// import { Category } from '../../redux/slices/categories/categoriesSlice'
+// import { fetchCategories } from '../../redux/slices/categories/categoriesSlice'
 
 const Home = () => {
-  const { products, isLoading, error, searchInput } = useProductState()
+  const { products, searchInput } = useProductState()
 
   const { categories } = useCategoriesState()
 
-  const [selectedCategory, setSelectedCategory] = useState<number[]>([])
+   //const [selectedCategory, setSelectedCategory] = useState<number[]>([])
+   const [selectedCategory, setSelectedCategory] = useState<string[]>([])
+  //const [selectedCategory, setSelectedCategory] = useState('')
+  
 
   const [priceRange, setPriceRange] = useState<number[]>([])
 
@@ -29,21 +34,42 @@ const Home = () => {
 
   const dispatch: AppDispatch = useDispatch()
 
+  useEffect(() => {
+    dispatch(fetchProducts()) //! pass limit and page for pagination
+  }, []) //dispatch as dependincies //! page and limit as dependincies
+
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     const searchItem = event.target.value
     dispatch(searchProduct(searchItem))
   }
 
-  //Filter by category or price functionality
-  const handleSelectedCategory = (categoryId: number) => {
-    if (selectedCategory.includes(categoryId)) {
-      const filteredCategories = selectedCategory.filter((category) => category !== categoryId)
-      setSelectedCategory(filteredCategories)
-    } else {
-      setSelectedCategory((prevState) => {
-        return [...prevState, categoryId]
-      })
-    }
+  //Filter by category and price functionality
+  const handleSelectedCategory = (categoryId: string) => {
+    //categoryId: string //category: Category
+    // if (selectedCategory.includes(categoryId)) {
+    //   const filteredCategories = selectedCategory.filter((category) => category !== categoryId)
+    //   setSelectedCategory(filteredCategories)
+    // } else {
+    //   setSelectedCategory((prevState) => {
+    //     return [...prevState, categoryId]
+    //   })
+    // }
+    ///////////////////////////////
+    setSelectedCategory((prevState) => {
+      return prevState.includes(categoryId)
+        ? prevState.filter((category) => category !== categoryId)
+        : [categoryId]
+    })
+    ////////////////////////
+    // const selectedCategoryMatch = categories.find((category) => category._id === categoryId)
+    // if (selectedCategoryMatch) {
+    //   setSelectedCategory(selectedCategoryMatch.title)
+    // }
+
+    // if (categories.includes(category)) {
+    //   setSelectedCategory(category._id)
+    // }
+    // console.log(selectedCategory)
   }
 
   const handleSelectedPrice = (priceId: number) => {
@@ -55,17 +81,28 @@ const Home = () => {
 
   const filteredProducts = products.filter((product) => {
     const categoryMatch =
-      selectedCategory.length > 0
-        ? selectedCategory.some((id) => product.categories.includes(Number(id)))
-        : product
+      // selectedCategory.length > 0
+      //   ? selectedCategory.some((id) => product.categoryId.includes(Number(id)))
+      //   : product
+       selectedCategory.length > 0 ? selectedCategory.includes(product.category) : true
 
+    // let categoryMatch = products
+    // if (selectedCategory.length > 0 && (product.category === selectedCategory)) {
+    //      categoryMatch = product
+    //   } 
+      
+
+    
+    
     const priceMatch =
       priceRange.length > 0
         ? product.price >= priceRange[0] && product.price <= priceRange[1]
         : product
 
     const searchResult =
-      searchInput !== '' ? product.name.toLowerCase().includes(searchInput.toLowerCase()) : products
+      searchInput !== ''
+        ? product.title.toLowerCase().includes(searchInput.toLowerCase())
+        : products
 
     return categoryMatch && priceMatch && searchResult
   })
@@ -106,12 +143,12 @@ const Home = () => {
     dispatch(addToCart(product))
   }
 
-  if (isLoading) {
-    return <p>Loading...</p>
-  }
-  if (error) {
-    return <p>{error}</p>
-  }
+  // if (isLoading) {
+  //   return <p>Loading...</p>
+  // }
+  // if (error) {
+  //   return <p>{error}</p>
+  // }
 
   return (
     <div className="home-container">
@@ -149,16 +186,16 @@ const Home = () => {
               {categories.length > 0 &&
                 categories.map((category) => {
                   return (
-                    <label htmlFor="category" key={category.id}>
+                    <label htmlFor="category" key={category._id}>
                       <input
-                        type="checkbox"
+                        type="radio" 
                         name="category"
-                        value={category.name}
+                        value={category.title}
                         onChange={() => {
-                          handleSelectedCategory(category.id)
+                          handleSelectedCategory(category._id) 
                         }}
                       />
-                      {category.name}
+                      {category.title}
                     </label>
                   )
                 })}
@@ -192,14 +229,14 @@ const Home = () => {
       <div className="products-container">
         {currentItems.length > 0 &&
           currentItems.map((product: Product) => {
-            const { id, name, image, description, price } = product
+            const { _id, title, slug, image, description, price } = product
             return (
-              <article className="product-card" key={id}>
-                <img src={image} alt={name} width={200} height={200} />
-                <p>{name}</p>
+              <article className="product-card" key={_id}>
+                <img src={image} alt={title} width={200} height={200} />
+                <p>{title}</p>
                 <p>{description}</p>
                 <p>${price}</p>
-                <Link to={`/productDetails/${id}`}>Show more</Link>
+                <Link to={`/productDetails/${slug}`}>Show more</Link>
                 <div>
                   <button
                     className="btn"
@@ -208,7 +245,6 @@ const Home = () => {
                     }}>
                     Add to cart
                   </button>
-
                 </div>
               </article>
             )

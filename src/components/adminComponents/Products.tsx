@@ -19,9 +19,20 @@ import showToast from '../../utils/toastUtils'
 import { fetchCategories } from '../../redux/slices/categories/categoriesSlice'
 import useCategoriesState from '../../hooks/useCategoriesState'
 
+export type ProductEditType = {
+  title: string
+  price: string
+  category: string 
+  image: File | undefined | string
+  description: string
+  quantity: string
+  sold?: string
+  shipping: string
+}
+
 const initialProductData = {
   title: '',
-  image: '',
+  image: undefined,
   description: '',
   category: '',
   price: '0',
@@ -30,14 +41,14 @@ const initialProductData = {
 }
 
 const Products = () => {
-  const { products, searchInput } = useProductsState()
+  const { products, searchInput, isLoading, error } = useProductsState()
 
   const { categories } = useCategoriesState()
 
   // ! handle pagination (create page and limit states)
   //console.log(pagination)
 
-  const [productInfo, setProductInfo] = useState({... initialProductData})
+  const [productInfo, setProductInfo] = useState<ProductEditType>({ ...initialProductData })
   
   const [isEdit, setIsEdit] = useState(false)
 
@@ -79,16 +90,15 @@ const Products = () => {
   const handleEditProduct = (
     _id: string,
     title: string,
-    image: string,
+    image: File | undefined | string,
     description: string,
     category: string,
-    price: number,
-    quantity: number,
-    shipping: number
+    price: string,
+    quantity: string,
+    shipping: string
   ) => {
     setEditId(_id)
     setIsEdit(!isEdit)
-    console.log(editId);
 
     if (!isEdit) {
       setProductInfo({
@@ -96,93 +106,45 @@ const Products = () => {
         image,
         description,
         category,
-        quantity: String(quantity),
-        shipping: String(shipping),
-        price: String(price)
+        quantity: quantity,
+        shipping: shipping,
+        price: price
       })
     } else {
-      setProductInfo({... initialProductData})
+      setProductInfo({ ...initialProductData })
     }
   }
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
 
-    console.log('here');
-
-    // if (
-    //   productInfo.title.length < 2 ||
-    //   productInfo.description.length < 5 ||
-    //   productInfo.category.length < 1 ||
-    //   productInfo.image.length < 15 ||
-    //   productInfo.price === '0' ||
-    //   productInfo.quantity === '0' ||
-    //   productInfo.shipping === '0'
-    // ) {
-    //   setValidation('Please fill the form')
-    //   return
-    // }
-
-    // const formData = new FormData()
-    // formData.append('title', productInfo.title)
-    // formData.append('description', productInfo.description)
-    // formData.append('category', productInfo.category)
-    // formData.append('image', productInfo.image)
-    // formData.append('price', productInfo.price)
-    // formData.append('quantity', productInfo.quantity)
-    // formData.append('shipping', productInfo.shipping)
-
-    // dispatch(createProduct(formData))
-    // // for (const [key, value] of formData) {
-    // //   console.log(key, value);
-    // // }
-
     if (isEdit) {
-      console.log('edit')
-      //const editProductData = { _id: editId, ...productInfo }
-      // const editProductData = {
-      //   _id: editId,
-      //   title: productInfo.title,
-      //   description: productInfo.description,
-      //   category: productInfo.category,
-      //   quantity: Number(productInfo.quantity),
-      //   shipping: Number(productInfo.shipping),
-      //   price: Number(productInfo.price)
-      // }
-
       const editProductData = new FormData()
-      //editProductData.append('_id', editId)
       editProductData.append('title', productInfo.title)
       editProductData.append('description', productInfo.description)
       editProductData.append('category', productInfo.category)
-      editProductData.append('image', productInfo.image)
+      editProductData.append('image', productInfo.image as Blob)
       editProductData.append('price', productInfo.price)
       editProductData.append('quantity', productInfo.quantity)
       editProductData.append('shipping', productInfo.shipping)
-      console.log('edite', productInfo.category)
-
-      for (const [key, value] of editProductData) {
-        console.log(key, value)
-      }
 
       dispatch(updateProduct({ updatedProduct: editProductData, id: editId }))
       showToast('success', 'Updated successfully')
     } else {
-      console.log('create');
-      const formData = new FormData()
-      formData.append('title', productInfo.title)
-      formData.append('description', productInfo.description)
-      formData.append('category', productInfo.category)
-      formData.append('image', productInfo.image)
-      formData.append('price', productInfo.price)
-      formData.append('quantity', productInfo.quantity)
-      formData.append('shipping', productInfo.shipping)
-      console.log('create',productInfo.category)
+      const newProduct = new FormData()
+      newProduct.append('title', productInfo.title)
+      newProduct.append('description', productInfo.description)
+      newProduct.append('category', productInfo.category)
+      newProduct.append('image', productInfo.image as Blob)
+      newProduct.append('price', productInfo.price)
+      newProduct.append('quantity', productInfo.quantity)
+      newProduct.append('shipping', productInfo.shipping)
 
-      dispatch(createProduct(formData))
-      for (const [key, value] of formData) {
-        console.log(key, value);
-      }
+      dispatch(createProduct(newProduct))
+      showToast('success', 'Created successfully')
+      // for (const [key, value] of newProduct) {
+      //   console.log(key, value)
+      // }
     }
 
     setProductInfo({ ...initialProductData })
@@ -212,12 +174,12 @@ const Products = () => {
     }
   }
 
-  // if (isLoading) {
-  //   return <p>Loading...</p>
-  // }
-  // if (error) {
-  //   return <p>{error}</p>
-  // }
+  if (isLoading) {
+    return <p>Loading...</p>
+  }
+  if (error) {
+    return <p>{error}</p>
+  }
 
   return (
     <div className="admin-container">
@@ -247,6 +209,20 @@ const Products = () => {
                 onChange={handleChange}
                 required
               />
+              {productInfo.image && (
+                <div>
+                  {productInfo.image instanceof File ? (
+                    <img
+                      src={URL.createObjectURL(productInfo.image)}
+                      alt="preview"
+                      width={50}
+                      height={50}
+                    />
+                  ) : (
+                    <img src={productInfo.image as string} alt="preview" width={50} height={50} />
+                  )}
+                </div>
+              )}
             </div>
             <div className="admin-form-line">
               <label htmlFor="description">Product descripton:</label>
@@ -323,11 +299,11 @@ const Products = () => {
         <div className="products-container">
           {searchResult.length > 0 &&
             searchResult.map((product: Product) => {
-              const { _id, title, image, description, category, price, quantity, sold, shipping } = product
-              console.log(category);
+              const { _id, title, image, description, category, price, quantity, sold, shipping } =
+                product
               return (
                 <article className="product-card" key={_id}>
-                  <img src={image} alt={title} width={100} height={100} />
+                  <img src={image as string} alt={title} width={100} height={100} />
                   <p>ID: {_id}</p>
                   <p>Title: {title}</p>
                   <p>Description: {description}</p>

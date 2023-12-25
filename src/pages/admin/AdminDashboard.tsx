@@ -8,15 +8,21 @@ import { updateAdminProfile } from '../../redux/slices/users/userSlice'
 import showToast from '../../utils/toastUtils'
 import axios from 'axios'
 
+type AdminEditType = {
+  username: string;
+  email: string;
+  image: File | undefined | string
+}
+
 const AdminDashboard = () => {
   const { userData } = useUserState()
 
   const [isFormOpen, setIsFormOpen] = useState(false)
 
-  const [user, setUser] = useState({
+  const [user, setUser] = useState<AdminEditType>({
     username: userData?.username || '',
     email: userData?.email || '',
-    image: userData?.image || ''
+    image: undefined
   })
 
   const [validation, setValidation] = useState('')
@@ -53,14 +59,14 @@ const AdminDashboard = () => {
       const editAdminData = new FormData()
       editAdminData.append('username', user.username)
       editAdminData.append('email', user.email)
-      editAdminData.append('image', user.image)
+      editAdminData.append('image', user.image as Blob)
 
       for (const [key, value] of editAdminData) {
         console.log(key, value)
       }
 
-      if (userData) {
-        dispatch(updateAdminProfile({ updatedAdmin: editAdminData, id: userData?._id }))
+      if (userData && userData?._id) {
+        dispatch(updateAdminProfile({ updatedAdmin: editAdminData, id: userData._id }))
         showToast('success', 'Updated successfully')
       }
     } catch (error) {
@@ -79,7 +85,7 @@ const AdminDashboard = () => {
       <AdminSidebar />
       <div className="admin-main-content">
         <div className="admin-info">
-          <img src={userData?.image} alt={userData?.username} width={100} height={90} />
+          <img src={userData?.image as string} alt={userData?.username} width={100} height={90} />
         </div>
         <div className="admin-info">
           <p>ID: {userData?._id}</p>
@@ -126,6 +132,20 @@ const AdminDashboard = () => {
                 onChange={handleChange}
                 required
               />
+              {user.image && (
+                <div>
+                  {user.image instanceof File ? (
+                    <img
+                      src={URL.createObjectURL(user.image)}
+                      alt="preview"
+                      width={50}
+                      height={50}
+                    />
+                  ) : (
+                    <img src={user.image as string} alt="preview" width={50} height={50} />
+                  )}
+                </div>
+              )}
               <p className="form-validation">{validation}</p>
 
               <button className="btn" type="submit">

@@ -3,27 +3,27 @@ import { useDispatch } from 'react-redux'
 import axios from 'axios'
 
 import { AppDispatch } from '../../redux/store'
-import { createUser } from '../../redux/slices/users/userSlice'
+import { User, createUser } from '../../redux/slices/users/userSlice'
 import showToast from '../../utils/toastUtils'
 
-const Register = () => {
-  const [user, setUser] = useState({
-    username: '',
-    email: '',
-    password: '',
-    image: '',
-    phone: '',
-    address: ''
-  })
+const initialUserData = {
+  username: '',
+  email: '',
+  password: '',
+  image: undefined,
+  phone: '',
+  address: ''
+}
 
-  console.log(user)
+const Register = () => {
+  const [user, setUser] = useState<User>({ ...initialUserData })
 
   const [validation, setValidation] = useState('')
 
   const dispatch: AppDispatch = useDispatch()
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const {name, type} = event.target
+    const { name, type } = event.target
     if (type === 'file') {
       const fileInput = (event.target as HTMLInputElement) || ''
       const file = fileInput.files?.[0]
@@ -40,15 +40,14 @@ const Register = () => {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
-    
+
     const formData = new FormData()
     formData.append('username', user.username)
     formData.append('email', user.email)
     formData.append('password', user.password)
-    formData.append('image', user.image)
+    formData.append('image', user.image as Blob)
     formData.append('phone', user.phone)
     formData.append('address', user.address)
-
 
     if (user.username.length < 3) {
       setValidation('Username should be at least 3 characters')
@@ -73,9 +72,10 @@ const Register = () => {
 
     try {
       const response = await dispatch(createUser(formData))
-     
+
       if (response.meta.requestStatus === 'fulfilled') {
         showToast('success', 'Check your email for activation')
+        setUser({ ...initialUserData })
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -125,6 +125,15 @@ const Register = () => {
             onChange={handleChange}
             required
           />
+          {user.image && (
+            <div>
+              {user.image instanceof File ? (
+                <img src={URL.createObjectURL(user.image)} alt="preview" width={50} height={50} />
+              ) : (
+                <img src={user.image as string} alt="preview" width={50} height={50} />
+              )}
+            </div>
+          )}
 
           <label htmlFor="phone">Phone:</label>
           <input

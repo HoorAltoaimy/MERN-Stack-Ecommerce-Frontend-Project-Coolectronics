@@ -7,14 +7,14 @@ import { API_BASE_URL } from '../users/userSlice'
 export type Product = {
   _id: string
   title: string
-  slug: string
-  price: number
+  slug?: string
+  price: string
   category: string //Partial<Category>  //string
-  image: string
+  image: File | undefined | string
   description: string
-  quantity: number
-  sold: number
-  shipping: number
+  quantity: string
+  sold?: string
+  shipping: string
 }
 
 export type ProductsState = {
@@ -111,7 +111,6 @@ export const updateProduct = createAsyncThunk(
   'products/updateProduct',
   async ({ updatedProduct, id }: { updatedProduct: FormData; id: string }, { rejectWithValue }) => {
     try {
-      console.log(id)
       const response = await axios.put(
         `${API_BASE_URL}/products/update-product-info/${id}`,
         updatedProduct
@@ -158,40 +157,12 @@ export const productsSlice = createSlice({
         //state.products.sort((a, b) => a.id - b.id)
       }
       if (sortingCriteria === 'lowerPrice') {
-        state.products.sort((a, b) => a.price - b.price)
+        state.products.sort((a, b) => Number(a.price) - Number(b.price))
       }
       if (sortingCriteria === 'hieghrPrice') {
-        state.products.sort((a, b) => b.price - a.price)
+        state.products.sort((a, b) => Number(b.price) - Number(a.price))
       }
     },
-    // showProductDetailes: (state, action) => {
-    //   const id = action.payload
-    //   const productFound = state.products.find((product) => product._id === id)
-    //   if (productFound) {
-    //     state.singleProduct = productFound
-    //   }
-    // },
-    // addProduct: (state, action) => {
-    //   state.products.push(action.payload)
-    // },
-    // deleteProduct: (state, action) => {
-    //   const id = action.payload
-    //   const filteredProducts = state.products.filter((product) => product._id !== id)
-    //   state.products = filteredProducts
-    // },
-    // editProduct: (state, action) => {
-    //   const { id, title, image, description, category, price, quantity, shipping } = action.payload
-    //   const productFound = state.products.find((product) => product._id === id)
-    //   if (productFound) {
-    //     productFound.title = title
-    //     productFound.image = image
-    //     productFound.description = description
-    //     productFound.category = category
-    //     productFound.price = price
-    //     productFound.quantity = quantity
-    //     productFound.shipping = shipping
-    //   }
-    // }
   },
   extraReducers(builder) {
     //fetchProducts
@@ -221,18 +192,19 @@ export const productsSlice = createSlice({
     //fetchSingleProduct
     builder.addCase(fetchSingleProduct.fulfilled, (state, action) => {
       state.singleProduct = action.payload
+      state.isLoading = false
     })
 
     //createProduct
     builder.addCase(createProduct.fulfilled, (state, action) => {
       state.products.push(action.payload.payload)
+      state.isLoading = false
     })
 
     //updateProduct
     builder.addCase(updateProduct.fulfilled, (state, action) => {
       const { _id, title, image, description, category, price, quantity, shipping } =
         action.payload.payload
-      console.log(category);
       const productFound = state.products.find((product) => product._id === _id)
       if (productFound) {
         productFound.title = title
@@ -243,6 +215,7 @@ export const productsSlice = createSlice({
         productFound.quantity = quantity
         productFound.shipping = shipping
       }
+      state.isLoading = false
     })
 
     //deleteProduct

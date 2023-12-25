@@ -4,15 +4,15 @@ import axios from 'axios'
 axios.defaults.withCredentials = true
 
 export type User = {
-  _id: string
+  _id?: string
   username: string
   email: string
   password: string
-  image: string
+  image?: File | undefined |string
   address: string
   phone: string
-  isAdmin: boolean
-  isBanned: boolean
+  isAdmin?: boolean
+  isBanned?: boolean
 }
 
 type ResetData = {
@@ -278,6 +278,7 @@ export const usersSlice = createSlice({
     //activateUser
     builder.addCase(activateUser.fulfilled, (state, action) => {
       state.users.push(action.payload.payload)
+      state.isLoading = false
     })
 
     //deleteUser
@@ -293,7 +294,6 @@ export const usersSlice = createSlice({
     //updateUserProfile
     builder.addCase(updateUserProfile.fulfilled, (state, action) => {
       const { username, email, image, phone, address } = action.payload.payload
-
       if (state.userData) {
         state.userData.username = username
         state.userData.email = email
@@ -301,17 +301,18 @@ export const usersSlice = createSlice({
         state.userData.phone = phone
         state.userData.address = address
       }
+      state.isLoading = false
     })
 
     //updateAdminProfile
     builder.addCase(updateAdminProfile.fulfilled, (state, action) => {
       const { username, email, image } = action.payload.payload
-
       if (state.userData) {
         state.userData.username = username
         state.userData.email = email
         state.userData.image = image
       }
+      state.isLoading = false
     })
 
     //banUser
@@ -345,6 +346,7 @@ export const usersSlice = createSlice({
           userData: state.userData
         })
       )
+      state.isLoading = false
     })
 
     //logoutUser
@@ -358,6 +360,7 @@ export const usersSlice = createSlice({
           userData: state.userData
         })
       )
+      state.isLoading = false
     })
 
     //for all requests

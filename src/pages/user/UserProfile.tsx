@@ -7,15 +7,23 @@ import { AppDispatch } from '../../redux/store'
 import { updateUserProfile } from '../../redux/slices/users/userSlice'
 import showToast from '../../utils/toastUtils'
 
+type UserEditType = {
+  username: string
+  email: string
+  image: File | undefined | string
+  phone: string
+  address: string
+}
+
 const UserProfile = () => {
   const { userData, error } = useUsersState()
 
   const [isFormOpen, setIsFormOpen] = useState(false)
 
-  const [user, setUser] = useState({
+  const [user, setUser] = useState<UserEditType>({
     username: userData?.username || '',
     email: userData?.email || '',
-    image: userData?.image || '',
+    image: undefined,
     phone: userData?.phone || '',
     address: userData?.address || ''
   })
@@ -70,12 +78,12 @@ const UserProfile = () => {
       const editUserData = new FormData()
       editUserData.append('username', user.username)
       editUserData.append('email', user.email)
-      editUserData.append('image', user.image)
+      editUserData.append('image', user.image as unknown as Blob)
       editUserData.append('phone', user.phone)
       editUserData.append('address', user.address)
 
-      if (userData) {
-        dispatch(updateUserProfile({ updatedUser: editUserData, id: userData?._id }))
+      if (userData && userData._id) {
+        dispatch(updateUserProfile({ updatedUser: editUserData, id: userData._id }))
         showToast('success', 'Updated successfully')
       }
     } catch (error) {
@@ -96,7 +104,7 @@ const UserProfile = () => {
         {userData && (
           <div className="user-form">
             <div key={userData._id}>
-              <img src={userData.image} alt={userData.username} width={100} height={90} />
+              <img src={userData.image as string} alt={userData.username} width={100} height={90} />
               <p>User ID: {userData._id}</p>
               <p>Username: {userData.username}</p>
               <p>Email: {userData.email}</p>
@@ -138,6 +146,15 @@ const UserProfile = () => {
                     onChange={handleChange}
                     required
                   />
+                  {user.image && (
+                    <div>
+                      {user.image instanceof File ? (
+                        <img src={URL.createObjectURL(user.image)} alt="preview" width={50} height={50} />
+                      ) : (
+                        <img src={user.image as string} alt="preview" width={50} height={50} />
+                      )}
+                    </div>
+                  )}
 
                   <label htmlFor="phone">Phone:</label>
                   <input

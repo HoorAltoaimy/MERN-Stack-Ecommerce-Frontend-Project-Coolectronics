@@ -8,6 +8,7 @@ import {
   banUser,
   deleteUser,
   fetchUsers,
+  grantRole,
   searchUser,
   unbanUser
 } from '../../redux/slices/users/userSlice'
@@ -18,7 +19,7 @@ import AdminSidebar from './AdminSidebar'
 import showToast from '../../utils/toastUtils'
 
 const Users = () => {
-  const { users, error, searchInput } = useUsersState()
+  const { users, error, isLoading, searchInput } = useUsersState()
 
   const dispatch: AppDispatch = useDispatch()
 
@@ -43,43 +44,66 @@ const Users = () => {
 
   //! handle grant role here
 
-  const handleDeleteUser = async (id: string) => {
-    try {
-      const response = await dispatch(deleteUser(id))
+  const handleDeleteUser = async (id: string | undefined) => {
+    if (id) {
+      try {
+        const response = await dispatch(deleteUser(id))
 
-      if (response.meta.requestStatus === 'fulfilled') {
-        showToast('success', 'User deleted successfully')
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        showToast('error', error?.response?.data.message)
+        if (response.meta.requestStatus === 'fulfilled') {
+          showToast('success', 'User deleted successfully')
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          showToast('error', error?.response?.data.message)
+        }
       }
     }
   }
 
-  const handleBanStatus = async (id: string, isBanned: boolean) => {
-    try {
-      const response = isBanned ? await dispatch(unbanUser(id)) : await dispatch(banUser(id))
+  const handleBanStatus = async (id: string | undefined, isBanned: boolean | undefined) => {
+    if (id && isBanned) {
+      try {
+        const response = isBanned ? await dispatch(unbanUser(id)) : await dispatch(banUser(id))
 
-      if (response.meta.requestStatus === 'fulfilled') {
-        showToast('success', 'User ban status updated successfully')
-      }
-      if (response.meta.requestStatus === 'rejected') {
-        showToast('error', 'Unable to update the ban status of this user')
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        showToast('error', error?.response?.data.message)
+        if (response.meta.requestStatus === 'fulfilled') {
+          showToast('success', 'User ban status updated successfully')
+        }
+        if (response.meta.requestStatus === 'rejected') {
+          showToast('error', 'Unable to update the ban status of this user')
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          showToast('error', error?.response?.data.message)
+        }
       }
     }
   }
 
-  // if (isLoading) {
-  //   return <p>Loading...</p>
-  // }
-  // if (error) {
-  //   return <p>{error}</p>
-  // }
+  const handleGrantRole = async (id: string | undefined) => {
+    if (id) {
+      try {
+        const response = await dispatch(grantRole(id))
+
+        if (response.meta.requestStatus === 'fulfilled') {
+          showToast('success', 'User role updated successfully')
+        }
+        if (response.meta.requestStatus === 'rejected') {
+          showToast('error', 'Unable to update the user role')
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          showToast('error', error?.response?.data.message)
+        }
+      }
+    }
+  }
+
+  if (isLoading) {
+    return <p>Loading...</p>
+  }
+  if (error) {
+    return <p>{error}</p>
+  }
 
   return (
     <div className="admin-container">
@@ -104,6 +128,7 @@ const Users = () => {
             <td>Email</td>
             <td>Delete User</td>
             <td>Block User</td>
+            <td>Grant a role</td>
           </thead>
           {searchResult.length > 0 &&
             searchResult.map((user: User) => {
@@ -113,10 +138,9 @@ const Users = () => {
                   <tr key={_id} className="users-card">
                     <td>{_id}</td>
                     {/* <td>{<img src={`http://localhost:5050/${image}`} alt={username} width={50} height={50} />}</td> */}
-                    <td>{<img src={image} alt={username} width={50} height={50} />}</td>
+                    <td>{<img src={image as string} alt={username} width={50} height={50} />}</td>
                     <td>{username}</td>
                     <td>{email}</td>
-                    <td>{isBanned}</td>
                     <td>
                       <button
                         className="btn"
@@ -133,6 +157,15 @@ const Users = () => {
                           handleBanStatus(_id, isBanned)
                         }}>
                         {isBanned ? 'Unban' : 'Ban'}
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        className="btn"
+                        onClick={() => {
+                          handleGrantRole(_id)
+                        }}>
+                        Make an admin
                       </button>
                     </td>
                   </tr>

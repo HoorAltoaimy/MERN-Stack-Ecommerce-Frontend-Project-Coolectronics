@@ -184,6 +184,20 @@ export const unbanUser = createAsyncThunk(
   }
 )
 
+export const grantRole = createAsyncThunk('users/grantRole', async (id: string, { rejectWithValue }) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/users/grantRole/${id}`)
+    if (!response) {
+      throw new Error('No response')
+    }
+    return id
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      return rejectWithValue(error.response?.data.msg)
+    }
+  }
+})
+
 export const loginUser = createAsyncThunk(
   'users/loginUser',
   async (user: object, { rejectWithValue }) => {
@@ -331,6 +345,16 @@ export const usersSlice = createSlice({
       const userFound = state.users.find((user) => user._id === id)
       if (userFound) {
         userFound.isBanned = false
+      }
+      state.isLoading = false
+    })
+
+    //grantRole
+    builder.addCase(grantRole.fulfilled, (state, action) => {
+      const id = action.payload
+      const userFound = state.users.find((user) => user._id === id)
+      if (userFound) {
+        userFound.isAdmin = true
       }
       state.isLoading = false
     })

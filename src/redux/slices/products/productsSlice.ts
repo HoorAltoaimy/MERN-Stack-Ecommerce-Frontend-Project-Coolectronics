@@ -2,13 +2,14 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
 import { API_BASE_URL } from '../users/userSlice'
+//import { Category } from '../categories/categoriesSlice'
 
 export type Product = {
   _id: string
   title: string
   slug: string
   price: number
-  category: string
+  category: string //Partial<Category>  //string
   image: string
   description: string
   quantity: number
@@ -56,6 +57,25 @@ export const fetchProducts = createAsyncThunk('products/fetchProducts', async ()
   }
 })
 
+export const fetchProducts2 = createAsyncThunk(
+  'products/fetchProducts2',
+  async (pagination: { page: number; limit: number }) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/products?page=${pagination.page}&limit=${pagination.limit}`
+      )
+      if (!response) {
+        throw new Error('No response')
+      }
+      return response.data
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data.msg)
+      }
+    }
+  }
+)
+
 export const fetchSingleProduct = createAsyncThunk('products/fetchSingleProduct', async (slug: string) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/products/${slug}`)
@@ -89,10 +109,11 @@ export const createProduct = createAsyncThunk(
 
 export const updateProduct = createAsyncThunk(
   'products/updateProduct',
-  async (updatedProduct: Partial<Product>, { rejectWithValue }) => {
+  async ({ updatedProduct, id }: { updatedProduct: FormData; id: string }, { rejectWithValue }) => {
     try {
+      console.log(id)
       const response = await axios.put(
-        `${API_BASE_URL}/products/update-product-info/${updatedProduct._id}`,
+        `${API_BASE_URL}/products/update-product-info/${id}`,
         updatedProduct
       )
       if (!response) {
@@ -185,6 +206,18 @@ export const productsSlice = createSlice({
       state.isLoading = false
     })
 
+    //fetchProducts2
+    builder.addCase(fetchProducts2.fulfilled, (state, action) => {
+      const { currentPage, totalPages, totalProducts } = action.payload.payload.pagination
+      state.pagination = {
+        currentPage,
+        totalPages,
+        totalProducts
+      }
+      state.products = action.payload.payload.products
+      state.isLoading = false
+    })
+
     //fetchSingleProduct
     builder.addCase(fetchSingleProduct.fulfilled, (state, action) => {
       state.singleProduct = action.payload
@@ -199,6 +232,7 @@ export const productsSlice = createSlice({
     builder.addCase(updateProduct.fulfilled, (state, action) => {
       const { _id, title, image, description, category, price, quantity, shipping } =
         action.payload.payload
+      console.log(category);
       const productFound = state.products.find((product) => product._id === _id)
       if (productFound) {
         productFound.title = title

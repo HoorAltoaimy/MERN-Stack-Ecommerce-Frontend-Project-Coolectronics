@@ -38,6 +38,7 @@ const Products = () => {
   //console.log(pagination)
 
   const [productInfo, setProductInfo] = useState({... initialProductData})
+  
   const [isEdit, setIsEdit] = useState(false)
 
   const [editId, setEditId] = useState('')
@@ -87,6 +88,7 @@ const Products = () => {
   ) => {
     setEditId(_id)
     setIsEdit(!isEdit)
+    console.log(editId);
 
     if (!isEdit) {
       setProductInfo({
@@ -106,18 +108,20 @@ const Products = () => {
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
 
-    if (
-      productInfo.title.length < 2 ||
-      productInfo.description.length < 5 ||
-      productInfo.category.length < 1 ||
-      productInfo.image.length < 15 ||
-      productInfo.price === '0' ||
-      productInfo.quantity === '0' ||
-      productInfo.shipping === '0'
-    ) {
-      setValidation('Please fill the form')
-      return
-    }
+    console.log('here');
+
+    // if (
+    //   productInfo.title.length < 2 ||
+    //   productInfo.description.length < 5 ||
+    //   productInfo.category.length < 1 ||
+    //   productInfo.image.length < 15 ||
+    //   productInfo.price === '0' ||
+    //   productInfo.quantity === '0' ||
+    //   productInfo.shipping === '0'
+    // ) {
+    //   setValidation('Please fill the form')
+    //   return
+    // }
 
     // const formData = new FormData()
     // formData.append('title', productInfo.title)
@@ -134,21 +138,37 @@ const Products = () => {
     // // }
 
     if (isEdit) {
+      console.log('edit')
       //const editProductData = { _id: editId, ...productInfo }
-      const editProductData = {
-        _id: editId,
-        title: productInfo.title,
-        description: productInfo.description,
-        category: productInfo.category,
-        quantity: Number(productInfo.quantity),
-        shipping: Number(productInfo.shipping),
-        price: Number(productInfo.price)
-      }
-      dispatch(updateProduct(editProductData))
-    } else {
-      // const newProduct = { id: uuidv4(), ...productInfo }
-      // dispatch(addProduct(newProduct))
+      // const editProductData = {
+      //   _id: editId,
+      //   title: productInfo.title,
+      //   description: productInfo.description,
+      //   category: productInfo.category,
+      //   quantity: Number(productInfo.quantity),
+      //   shipping: Number(productInfo.shipping),
+      //   price: Number(productInfo.price)
+      // }
 
+      const editProductData = new FormData()
+      //editProductData.append('_id', editId)
+      editProductData.append('title', productInfo.title)
+      editProductData.append('description', productInfo.description)
+      editProductData.append('category', productInfo.category)
+      editProductData.append('image', productInfo.image)
+      editProductData.append('price', productInfo.price)
+      editProductData.append('quantity', productInfo.quantity)
+      editProductData.append('shipping', productInfo.shipping)
+      console.log('edite', productInfo.category)
+
+      for (const [key, value] of editProductData) {
+        console.log(key, value)
+      }
+
+      dispatch(updateProduct({ updatedProduct: editProductData, id: editId }))
+      showToast('success', 'Updated successfully')
+    } else {
+      console.log('create');
       const formData = new FormData()
       formData.append('title', productInfo.title)
       formData.append('description', productInfo.description)
@@ -157,11 +177,12 @@ const Products = () => {
       formData.append('price', productInfo.price)
       formData.append('quantity', productInfo.quantity)
       formData.append('shipping', productInfo.shipping)
+      console.log('create',productInfo.category)
 
       dispatch(createProduct(formData))
-      // for (const [key, value] of formData) {
-      //   console.log(key, value);
-      // }
+      for (const [key, value] of formData) {
+        console.log(key, value);
+      }
     }
 
     setProductInfo({ ...initialProductData })
@@ -302,18 +323,19 @@ const Products = () => {
         <div className="products-container">
           {searchResult.length > 0 &&
             searchResult.map((product: Product) => {
-              const { _id, title, image, description, category, price, quantity, sold, shipping } =
-                product
+              const { _id, title, image, description, category, price, quantity, sold, shipping } = product
+              console.log(category);
               return (
                 <article className="product-card" key={_id}>
                   <img src={image} alt={title} width={100} height={100} />
-                  <p>{_id}</p>
-                  <p>{title}</p>
-                  <p>{description}</p>
-                  <p>{price}</p>
-                  <p>{quantity}</p>
-                  <p>{sold}</p>
-                  <p>${shipping}</p>
+                  <p>ID: {_id}</p>
+                  <p>Title: {title}</p>
+                  <p>Description: {description}</p>
+                  {/* <p>Category: {category}</p> */}
+                  <p>Price: ${price}</p>
+                  <p>Shipping: ${shipping}</p>
+                  <p>Quantity: {quantity}</p>
+                  <p>Sold: {sold}</p>
                   <button
                     className="btn"
                     onClick={() => {
@@ -326,7 +348,7 @@ const Products = () => {
                         quantity,
                         shipping,
                         price
-                      ) 
+                      )
                     }}>
                     Edit
                   </button>

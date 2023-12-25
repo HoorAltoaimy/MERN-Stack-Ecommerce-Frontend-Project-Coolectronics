@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux'
 import useUserState from '../../hooks/useUsersState'
 import { AppDispatch } from '../../redux/store'
 import AdminSidebar from '../../components/adminComponents/AdminSidebar'
-import { updateUserProfile } from '../../redux/slices/users/userSlice'
+import { updateAdminProfile } from '../../redux/slices/users/userSlice'
 import showToast from '../../utils/toastUtils'
 import axios from 'axios'
 
@@ -24,17 +24,23 @@ const AdminDashboard = () => {
   const dispatch: AppDispatch = useDispatch()
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target
-    setUser((prevUser) => {
-      return { ...prevUser, [name]: value }
-    })
+    const { name, type, value } = event.target
+    if (type === 'file') {
+      const fileInput = (event.target as HTMLInputElement) || ''
+      const file = fileInput.files?.[0]
+      setUser((prevUsers) => {
+        return { ...prevUsers, [name]: file }
+      })
+    } else {
+      setUser((prevUsers) => {
+        return { ...prevUsers, [name]: value }
+      })
+    }
   }
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
     try {
-      const editUserData = { _id: userData?._id || '', ...user }
-
       if (user.username && user.username.length < 3) {
         setValidation('Username should be at least 3 characters')
         return
@@ -44,8 +50,19 @@ const AdminDashboard = () => {
         return
       }
 
-      dispatch(updateUserProfile(editUserData))
-      showToast('success', 'Updated successfully')
+      const editAdminData = new FormData()
+      editAdminData.append('username', user.username)
+      editAdminData.append('email', user.email)
+      editAdminData.append('image', user.image)
+
+      for (const [key, value] of editAdminData) {
+        console.log(key, value)
+      }
+
+      if (userData) {
+        dispatch(updateAdminProfile({ updatedAdmin: editAdminData, id: userData?._id }))
+        showToast('success', 'Updated successfully')
+      }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         showToast('error', error?.response?.data.message)
@@ -61,6 +78,9 @@ const AdminDashboard = () => {
     <div className="admin-container">
       <AdminSidebar />
       <div className="admin-main-content">
+        <div className="admin-info">
+          <img src={userData?.image} alt={userData?.username} width={100} height={90} />
+        </div>
         <div className="admin-info">
           <p>ID: {userData?._id}</p>
         </div>

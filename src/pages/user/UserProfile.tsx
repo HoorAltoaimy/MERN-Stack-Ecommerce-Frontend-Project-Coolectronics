@@ -31,7 +31,8 @@ const UserProfile = () => {
   }, [error])
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, type } = event.target
+    const { name, type, value } = event.target
+
     if (type === 'file') {
       const fileInput = (event.target as HTMLInputElement) || ''
       const file = fileInput.files?.[0]
@@ -39,7 +40,6 @@ const UserProfile = () => {
         return { ...prevUsers, [name]: file }
       })
     } else {
-      const { name, value } = event.target
       setUser((prevUsers) => {
         return { ...prevUsers, [name]: value }
       })
@@ -50,8 +50,6 @@ const UserProfile = () => {
     event.preventDefault()
 
     try {
-      const editUserData = { _id: userData?._id || '', ...user }
-
       if (user.username && user.username.length < 3) {
         setValidation('Username should be at least 3 characters')
         return
@@ -64,13 +62,20 @@ const UserProfile = () => {
         setValidation('Phone should 10 numbers')
         return
       }
-      if (user.phone && user.phone.length < 4) {
+      if (user.address && user.address.length < 4) {
         setValidation('Address should be at least 4 characters')
         return
       }
 
-      if (editUserData) {
-        dispatch(updateUserProfile(editUserData))
+      const editUserData = new FormData()
+      editUserData.append('username', user.username)
+      editUserData.append('email', user.email)
+      editUserData.append('image', user.image)
+      editUserData.append('phone', user.phone)
+      editUserData.append('address', user.address)
+
+      if (userData) {
+        dispatch(updateUserProfile({ updatedUser: editUserData, id: userData?._id }))
         showToast('success', 'Updated successfully')
       }
     } catch (error) {
@@ -91,6 +96,7 @@ const UserProfile = () => {
         {userData && (
           <div className="user-form">
             <div key={userData._id}>
+              <img src={userData.image} alt={userData.username} width={100} height={90} />
               <p>User ID: {userData._id}</p>
               <p>Username: {userData.username}</p>
               <p>Email: {userData.email}</p>

@@ -19,7 +19,7 @@ const AdminSidebar = () => {
           </ul>
         </div>
         <div className="admin-info">
-          <FaUser />
+          <img src={userData?.image} alt={userData?.username} width={80} height={70} />
         </div>
         <div className="admin-info">
           <p>{userData?.username}</p>

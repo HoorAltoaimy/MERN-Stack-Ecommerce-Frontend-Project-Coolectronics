@@ -113,16 +113,34 @@ export const deleteUser = createAsyncThunk(
 
 export const updateUserProfile = createAsyncThunk(
   'users/updateUserProfile',
-  async (userData: Partial<User>, { rejectWithValue }) => {
+  async ({ updatedUser, id }: { updatedUser: FormData; id: string }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`${API_BASE_URL}/users/update-user-info/${id}`, updatedUser)
+      if (!response) {
+        throw new Error('No response')
+      }
+      console.log(response.data.payload)
+      return response.data
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data.msg)
+      }
+    }
+  }
+)
+
+export const updateAdminProfile = createAsyncThunk(
+  'users/updateAdminProfile',
+  async ({ updatedAdmin, id }: { updatedAdmin: FormData; id: string }, { rejectWithValue }) => {
     try {
       const response = await axios.put(
-        `${API_BASE_URL}/users/update-user-info/${userData._id}`,
-        userData
+        `${API_BASE_URL}/users/update-admin-info/${id}`,
+        updatedAdmin
       )
       if (!response) {
         throw new Error('No response')
       }
-      console.log(response);
+      console.log(response.data.payload)
       return response.data
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -274,23 +292,26 @@ export const usersSlice = createSlice({
 
     //updateUserProfile
     builder.addCase(updateUserProfile.fulfilled, (state, action) => {
-      const { username, email, phone, address } = action.payload.payload
+      const { username, email, image, phone, address } = action.payload.payload
 
       if (state.userData) {
         state.userData.username = username
         state.userData.email = email
+        state.userData.image = image
         state.userData.phone = phone
         state.userData.address = address
       }
+    })
 
-      localStorage.setItem(
-        'loginData',
-        JSON.stringify({
-          isLoggedin: state.isLoggedin,
-          userData: state.userData
-        })
-      )
-      // }
+    //updateAdminProfile
+    builder.addCase(updateAdminProfile.fulfilled, (state, action) => {
+      const { username, email, image } = action.payload.payload
+
+      if (state.userData) {
+        state.userData.username = username
+        state.userData.email = email
+        state.userData.image = image
+      }
     })
 
     //banUser

@@ -572,6 +572,17 @@ table {
         height: fit-content;
     }
 
+    // .admin-profile {
+    //     display: grid;
+    //     align-content: flex-start;
+    //     row-gap: 20px;
+    //     margin-top: 2rem;
+    // }
+    
+    .admin-info {
+        margin-top: 2rem;
+    }
+
     .cart-item {
         grid-template-columns: auto;
     }
@@ -597,6 +608,7 @@ table {
 @media screen and (max-width: 500px) {
     .hero-text {
         font-size: x-small;
+        line-height: 1.8rem;
     }
     
     .products-container {

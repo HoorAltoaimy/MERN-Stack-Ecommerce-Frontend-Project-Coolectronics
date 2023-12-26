@@ -55,7 +55,12 @@ const ProductDetails = () => {
         {singleProduct && (
           <>
             <div className="product-img">
-              <img src={singleProduct.image} alt={singleProduct.title} width={300} height={300} />
+              <img
+                src={singleProduct.image as string}
+                alt={singleProduct.title}
+                width={300}
+                height={300}
+              />
             </div>
             <div className="product-info">
               <h2>{singleProduct.title}</h2>

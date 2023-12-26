@@ -9,7 +9,7 @@ export type Product = {
   title: string
   slug?: string
   price: string
-  category: string //Partial<Category>  //string
+  category: string
   image: File | undefined | string
   description: string
   quantity: string
@@ -19,6 +19,7 @@ export type Product = {
 
 export type ProductsState = {
   products: Product[]
+  originalProductsSort: Product[]
   pagination: {
     currentPage: number
     totalPages: number
@@ -32,6 +33,7 @@ export type ProductsState = {
 
 const initialState: ProductsState = {
   products: [],
+  originalProductsSort: [],
   pagination: {
     currentPage: 1,
     totalPages: 1,
@@ -43,26 +45,12 @@ const initialState: ProductsState = {
   singleProduct: {} as Product //creating empty product as an initial value
 }
 
-export const fetchProducts = createAsyncThunk('products/fetchProducts', async () => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/products`)
-    if (!response) {
-      throw new Error('No response')
-    }
-    return response.data
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data.msg)
-    }
-  }
-})
-
-export const fetchProducts2 = createAsyncThunk(
-  'products/fetchProducts2',
-  async (pagination: { page: number; limit: number }) => {
+export const fetchProducts = createAsyncThunk(
+  'products/fetchProducts',
+  async (data: { page: number; limit: number }, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/products?page=${pagination.page}&limit=${pagination.limit}`
+        `${API_BASE_URL}/products?page=${data.page}&limit=${data.limit}`
       )
       if (!response) {
         throw new Error('No response')
@@ -70,25 +58,52 @@ export const fetchProducts2 = createAsyncThunk(
       return response.data
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        throw new Error(error.response?.data.msg)
+        //throw new Error(error.response?.data.msg)
+        return rejectWithValue(error.response?.data.errors[0] || error.response?.data.msg)
       }
     }
   }
 )
 
-export const fetchSingleProduct = createAsyncThunk('products/fetchSingleProduct', async (slug: string) => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/products/${slug}`)
-    if (!response) {
-      throw new Error('No response')
-    }
-    return response.data.payload
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data.msg)
+export const filterProducts = createAsyncThunk(
+  'products/filterProducts',
+  async (
+    data: { page: number; limit: number; selectedCategories: string[]; priceRange: number[] },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/products/filter-products?page=${data.page}&limit=${data.limit}`,
+        data
+      )
+      if (!response) {
+        throw new Error('No response')
+      }
+      return response.data
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data.errors[0] || error.response?.data.msg)
+      }
     }
   }
-})
+)
+
+export const fetchSingleProduct = createAsyncThunk(
+  'products/fetchSingleProduct',
+  async (slug: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/products/singleProduct/${slug}`)
+      if (!response) {
+        throw new Error('No response')
+      }
+      return response.data.payload
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data.errors[0] || error.response?.data.msg)
+      }
+    }
+  }
+)
 
 export const createProduct = createAsyncThunk(
   'products/createProduct',
@@ -101,7 +116,7 @@ export const createProduct = createAsyncThunk(
       return response.data
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        return rejectWithValue(error.response?.data.msg)
+        return rejectWithValue(error.response?.data.errors[0] || error.response?.data.msg)
       }
     }
   }
@@ -121,7 +136,7 @@ export const updateProduct = createAsyncThunk(
       return response.data
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        return rejectWithValue(error.response?.data.msg)
+        return rejectWithValue(error.response?.data.errors[0] || error.response?.data.msg)
       }
     }
   }
@@ -138,7 +153,7 @@ export const deleteProduct = createAsyncThunk(
       return id
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        return rejectWithValue(error.response?.data.msg)
+        return rejectWithValue(error.response?.data.errors[0] || error.response?.data.msg)
       }
     }
   }
@@ -154,15 +169,15 @@ export const productsSlice = createSlice({
     sortProducts: (state, action) => {
       const sortingCriteria = action.payload
       if (sortingCriteria === 'none') {
-        //state.products.sort((a, b) => a.id - b.id)
-      }
-      if (sortingCriteria === 'lowerPrice') {
+        state.products = state.originalProductsSort
+      } else if (sortingCriteria === 'lowerPrice') {
         state.products.sort((a, b) => Number(a.price) - Number(b.price))
-      }
-      if (sortingCriteria === 'hieghrPrice') {
+      } else if (sortingCriteria === 'hieghrPrice') {
         state.products.sort((a, b) => Number(b.price) - Number(a.price))
+      } else if (sortingCriteria === 'title') {
+        state.products.sort((a, b) => a.title.localeCompare(b.title))
       }
-    },
+    }
   },
   extraReducers(builder) {
     //fetchProducts
@@ -174,11 +189,12 @@ export const productsSlice = createSlice({
         totalProducts
       }
       state.products = action.payload.payload.products
+      state.originalProductsSort = state.products
       state.isLoading = false
     })
 
-    //fetchProducts2
-    builder.addCase(fetchProducts2.fulfilled, (state, action) => {
+    //filterProducts
+    builder.addCase(filterProducts.fulfilled, (state, action) => {
       const { currentPage, totalPages, totalProducts } = action.payload.payload.pagination
       state.pagination = {
         currentPage,
@@ -186,6 +202,7 @@ export const productsSlice = createSlice({
         totalProducts
       }
       state.products = action.payload.payload.products
+      state.originalProductsSort = state.products
       state.isLoading = false
     })
 
@@ -198,6 +215,7 @@ export const productsSlice = createSlice({
     //createProduct
     builder.addCase(createProduct.fulfilled, (state, action) => {
       state.products.push(action.payload.payload)
+      state.originalProductsSort = state.products
       state.isLoading = false
     })
 
@@ -224,6 +242,7 @@ export const productsSlice = createSlice({
       const filteredProducts = state.products.filter((product) => product._id !== id)
       if (filteredProducts) {
         state.products = filteredProducts
+        state.originalProductsSort = state.products
       }
       state.isLoading = false
     })

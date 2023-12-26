@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { FaPaypal, FaTrash } from 'react-icons/fa'
 import { SiApplepay } from 'react-icons/si'
 import { useDispatch } from 'react-redux'
-import { toast } from 'react-toastify'
 
 import useCartState from '../../hooks/useCartState'
 import { clearCart, removeFromCart } from '../../redux/slices/cart/cartSlice'
 import { AppDispatch } from '../../redux/store'
+import showToast from '../../utils/toastUtils'
 
 const Cart = () => {
   const { cartItems } = useCartState()
@@ -15,25 +15,26 @@ const Cart = () => {
 
   const dispatch: AppDispatch = useDispatch()
 
-  const handleRemoveFromCart = (id: number) => {
+  const handleRemoveFromCart = (id: string) => {
+    dispatch(removeFromCart(id))
     if (toastCount < 1) {
-      toast.success('Item removed successfully')
+      showToast('success', 'Item removed successfully')
       setToastCount(toastCount + 1)
     }
-    dispatch(removeFromCart(id))
+    
   }
 
   const handleClearCart = () => {
+    dispatch(clearCart())
     if (toastCount < 1) {
-      toast.success('Items removed successfully')
+      showToast('success', 'Items removed successfully')
       setToastCount(toastCount + 1)
     }
-    dispatch(clearCart())
   }
 
   const cartTotal = () => {
     let totalAmount = 0
-    cartItems.length > 0 && cartItems.map((cartItem) => (totalAmount += cartItem.price))
+    cartItems.length > 0 && cartItems.map((cartItem) => (totalAmount += Number(cartItem.price)))
     return totalAmount
   }
 
@@ -58,22 +59,22 @@ const Cart = () => {
 
               <div>
                 {cartItems.map((cartItem) => {
-                  const { id, image, name, description, price } = cartItem
+                  const { _id, image, title, description, price } = cartItem
                   return (
-                    <article className="cart-item" key={id}>
+                    <article className="cart-item" key={_id}>
                       <div className="cart-image">
-                        <img src={image} alt={name} width={200} />
+                        <img src={image as string} alt={title} width={200} />
                       </div>
 
                       <div className="cart-info">
-                        <h4>{name}</h4>
+                        <h4>{title}</h4>
                         <p>{description}</p>
                         <h4>${price}</h4>
 
                         <button
                           className="delete-icon"
                           onClick={() => {
-                            handleRemoveFromCart(id)
+                            handleRemoveFromCart(_id)
                           }}>
                           <FaTrash size={20} />
                         </button>

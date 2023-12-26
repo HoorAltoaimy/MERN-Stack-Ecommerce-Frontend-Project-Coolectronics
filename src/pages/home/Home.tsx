@@ -2,10 +2,14 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa'
 import { useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { toast } from 'react-toastify'
 
 import { addToCart } from '../../redux/slices/cart/cartSlice'
-import { Product, fetchProducts, searchProduct } from '../../redux/slices/products/productsSlice'
+import {
+  Product,
+  fetchProducts,
+  filterProducts,
+  searchProduct
+} from '../../redux/slices/products/productsSlice'
 import { AppDispatch } from '../../redux/store'
 
 import Search from '../../components/products/Search'
@@ -13,18 +17,17 @@ import SortProducts from '../../components/products/SortProducts'
 import useCategoriesState from '../../hooks/useCategoriesState'
 import useProductState from '../../hooks/useProductsState'
 import { prices } from '../../../public/mock/priceData/prices'
+import { fetchCategories } from '../../redux/slices/categories/categoriesSlice'
+import showToast from '../../utils/toastUtils'
 // import { Category } from '../../redux/slices/categories/categoriesSlice'
 // import { fetchCategories } from '../../redux/slices/categories/categoriesSlice'
 
 const Home = () => {
-  const { products, searchInput } = useProductState()
+  const { products, searchInput, pagination } = useProductState()
 
   const { categories } = useCategoriesState()
 
-   //const [selectedCategory, setSelectedCategory] = useState<number[]>([])
-   const [selectedCategory, setSelectedCategory] = useState<string[]>([])
-  //const [selectedCategory, setSelectedCategory] = useState('')
-  
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
 
   const [priceRange, setPriceRange] = useState<number[]>([])
 
@@ -34,42 +37,45 @@ const Home = () => {
 
   const dispatch: AppDispatch = useDispatch()
 
-  useEffect(() => {
-    dispatch(fetchProducts()) //! pass limit and page for pagination
-  }, []) //dispatch as dependincies //! page and limit as dependincies
-
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     const searchItem = event.target.value
     dispatch(searchProduct(searchItem))
   }
 
+  const fetchData = async () => {
+    await dispatch(fetchProducts({ page: currentPage, limit: itemsPerPage }))
+    await dispatch(fetchCategories())
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [currentPage, itemsPerPage])
+
+  const fetchFilteredData = async () => {
+    await dispatch(
+      filterProducts({
+        page: currentPage,
+        limit: itemsPerPage,
+        selectedCategories: selectedCategories,
+        priceRange: priceRange
+      })
+    )
+  }
+
+  useEffect(() => {
+    fetchFilteredData()
+  }, [selectedCategories, priceRange])
+
   //Filter by category and price functionality
   const handleSelectedCategory = (categoryId: string) => {
-    //categoryId: string //category: Category
-    // if (selectedCategory.includes(categoryId)) {
-    //   const filteredCategories = selectedCategory.filter((category) => category !== categoryId)
-    //   setSelectedCategory(filteredCategories)
-    // } else {
-    //   setSelectedCategory((prevState) => {
-    //     return [...prevState, categoryId]
-    //   })
-    // }
-    ///////////////////////////////
-    setSelectedCategory((prevState) => {
-      return prevState.includes(categoryId)
-        ? prevState.filter((category) => category !== categoryId)
-        : [categoryId]
-    })
-    ////////////////////////
-    // const selectedCategoryMatch = categories.find((category) => category._id === categoryId)
-    // if (selectedCategoryMatch) {
-    //   setSelectedCategory(selectedCategoryMatch.title)
-    // }
-
-    // if (categories.includes(category)) {
-    //   setSelectedCategory(category._id)
-    // }
-    // console.log(selectedCategory)
+    if (selectedCategories.includes(categoryId)) {
+      const filteredCategories = selectedCategories.filter((category) => category !== categoryId)
+      setSelectedCategories(filteredCategories)
+    } else {
+      setSelectedCategories((prevState) => {
+        return [...prevState, categoryId]
+      })
+    }
   }
 
   const handleSelectedPrice = (priceId: number) => {
@@ -79,45 +85,15 @@ const Home = () => {
     }
   }
 
-  const filteredProducts = products.filter((product) => {
-    const categoryMatch =
-      // selectedCategory.length > 0
-      //   ? selectedCategory.some((id) => product.categoryId.includes(Number(id)))
-      //   : product
-       selectedCategory.length > 0 ? selectedCategory.includes(product.category) : true
+  const searchResult = searchInput
+    ? products.filter((product) => product.title.toLowerCase().includes(searchInput.toLowerCase()))
+    : products
 
-    // let categoryMatch = products
-    // if (selectedCategory.length > 0 && (product.category === selectedCategory)) {
-    //      categoryMatch = product
-    //   } 
-      
-
-    
-    
-    const priceMatch =
-      priceRange.length > 0
-        ? product.price >= priceRange[0] && product.price <= priceRange[1]
-        : product
-
-    const searchResult =
-      searchInput !== ''
-        ? product.title.toLowerCase().includes(searchInput.toLowerCase())
-        : products
-
-    return categoryMatch && priceMatch && searchResult
-  })
-
-  //Pagination
-  const lastItemIndex = currentPage * itemsPerPage
-  const firstItemIndex = lastItemIndex - itemsPerPage
-  const currentItems = filteredProducts.slice(firstItemIndex, lastItemIndex)
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
-
-  const handlePrevious = () => {
+  const handlePreviousPage = () => {
     setCurrentPage(currentPage - 1)
   }
 
-  const handleNext = () => {
+  const handleNextPage = () => {
     setCurrentPage(currentPage + 1)
   }
 
@@ -126,7 +102,7 @@ const Home = () => {
   }
 
   const pageNumbers = []
-  for (let i = 1; i <= totalPages; i++) {
+  for (let i = 1; i <= pagination.totalPages; i++) {
     pageNumbers.push(
       <button
         className="pagination"
@@ -140,8 +116,8 @@ const Home = () => {
   }
 
   const handleAddToCart = (product: Product) => {
-    toast.success('Added to cart successfully')
     dispatch(addToCart(product))
+    showToast('success', 'Added to cart successfully')
   }
 
   // if (isLoading) {
@@ -189,11 +165,11 @@ const Home = () => {
                   return (
                     <label htmlFor="category" key={category._id}>
                       <input
-                        type="radio" 
+                        type="checkbox"
                         name="category"
                         value={category.title}
                         onChange={() => {
-                          handleSelectedCategory(category._id) 
+                          handleSelectedCategory(category._id)
                         }}
                       />
                       {category.title}
@@ -228,12 +204,12 @@ const Home = () => {
       </div>
 
       <div className="products-container">
-        {currentItems.length > 0 &&
-          currentItems.map((product: Product) => {
+        {searchResult.length > 0 &&
+          searchResult.map((product: Product) => {
             const { _id, title, slug, image, description, price } = product
             return (
               <article className="product-card" key={_id}>
-                <img src={image} alt={title} width={200} height={200} />
+                <img src={image as string} alt={title} width={200} height={200} />
                 <p>{title}</p>
                 <p>{description}</p>
                 <p>${price}</p>
@@ -253,13 +229,16 @@ const Home = () => {
       </div>
 
       <div className="pagination-div">
-        <button className="pagination" onClick={handlePrevious} disabled={currentPage === 1}>
+        <button className="pagination" onClick={handlePreviousPage} disabled={currentPage === 1}>
           <FaArrowLeft />
         </button>
 
         {pageNumbers}
 
-        <button className="pagination" onClick={handleNext} disabled={currentPage === totalPages}>
+        <button
+          className="pagination"
+          onClick={handleNextPage}
+          disabled={currentPage === pagination.totalPages}>
           <FaArrowRight />
         </button>
       </div>

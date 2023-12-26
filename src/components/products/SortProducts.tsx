@@ -14,13 +14,14 @@ const SortProducts = () => {
 
   return (
     <div>
-      <label htmlFor="sort">Sort by price:</label>
+      <label htmlFor="sort">Sort by: </label>
       <select name="sort" id="sort" onChange={handleOptionChange}>
         <option value="none" defaultValue="none">
-          none
+          None
         </option>
-        <option value="lowerPrice">lower to hieghr</option>
-        <option value="hieghrPrice">hieghr to lower</option>
+        <option value="lowerPrice">Price: lower to hieghr</option>
+        <option value="hieghrPrice">Price: hieghr to lower</option>
+        <option value="title">Title</option>
       </select>
     </div>
   )

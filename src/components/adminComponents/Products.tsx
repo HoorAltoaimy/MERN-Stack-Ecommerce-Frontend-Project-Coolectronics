@@ -1,6 +1,7 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import axios from 'axios'
+import { FaArrowLeft, FaArrowRight } from 'react-icons/fa'
 
 import useProductsState from '../../hooks/useProductsState'
 import {
@@ -41,12 +42,13 @@ const initialProductData = {
 }
 
 const Products = () => {
-  const { products, searchInput, isLoading, error } = useProductsState()
+  const { products, searchInput, pagination } = useProductsState()
 
   const { categories } = useCategoriesState()
 
-  // ! handle pagination (create page and limit states)
-  //console.log(pagination)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const [itemsPerPage] = useState(3)
 
   const [productInfo, setProductInfo] = useState<ProductEditType>({ ...initialProductData })
   
@@ -58,9 +60,14 @@ const Products = () => {
 
   const dispatch: AppDispatch = useDispatch()
 
-  useEffect(() => {
-    dispatch(fetchProducts()) //! pass limit and page for pagination
-  }, []) //dispatch as dependincies //! page and limit as dependincies
+   const fetchData = async () => {
+     await dispatch(fetchProducts({ page: currentPage, limit: itemsPerPage }))
+     //await dispatch(fetchCategories())
+   }
+
+   useEffect(() => {
+     fetchData()
+   }, [currentPage, itemsPerPage])
 
   useEffect(() => {
     dispatch(fetchCategories()) 
@@ -73,7 +80,6 @@ const Products = () => {
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement> ) => {
     const { name, type, value } = event.target
-
     if (type === 'file') {
       const fileInput = (event.target as HTMLInputElement)
       const filePath = fileInput.files?.[0]
@@ -159,6 +165,32 @@ const Products = () => {
   const searchResult = searchInput
     ? products.filter((product) => product.title.toLowerCase().includes(searchInput.toLowerCase()))
     : products
+  
+  const handlePreviousPage = () => {
+    setCurrentPage(currentPage - 1)
+  }
+
+  const handleNextPage = () => {
+    setCurrentPage(currentPage + 1)
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const pageNumbers = []
+  for (let i = 1; i <= pagination.totalPages; i++) {
+    pageNumbers.push(
+      <button
+        className="pagination"
+        key={i}
+        onClick={() => {
+          handlePageChange(i)
+        }}>
+        {i}
+      </button>
+    )
+  }
 
   const handleDeleteProduct = async (id: string) => {
     try {
@@ -174,12 +206,12 @@ const Products = () => {
     }
   }
 
-  if (isLoading) {
-    return <p>Loading...</p>
-  }
-  if (error) {
-    return <p>{error}</p>
-  }
+  // if (isLoading) {
+  //   return <p>Loading...</p>
+  // }
+  // if (error) {
+  //   return <p>{error}</p>
+  // }
 
   return (
     <div className="admin-container">
@@ -338,6 +370,20 @@ const Products = () => {
                 </article>
               )
             })}
+        </div>
+        <div className="pagination-div">
+          <button className="pagination" onClick={handlePreviousPage} disabled={currentPage === 1}>
+            <FaArrowLeft />
+          </button>
+
+          {pageNumbers}
+
+          <button
+            className="pagination"
+            onClick={handleNextPage}
+            disabled={currentPage === pagination.totalPages}>
+            <FaArrowRight />
+          </button>
         </div>
       </div>
     </div>

@@ -1,15 +1,18 @@
 import { useState } from 'react'
-import { FaPaypal, FaTrash } from 'react-icons/fa'
-import { SiApplepay } from 'react-icons/si'
+import { FaTrash } from 'react-icons/fa'
 import { useDispatch } from 'react-redux'
 
 import useCartState from '../../hooks/useCartState'
 import { clearCart, removeFromCart } from '../../redux/slices/cart/cartSlice'
 import { AppDispatch } from '../../redux/store'
 import showToast from '../../utils/toastUtils'
+import useUsersState from '../../hooks/useUsersState'
+import Payment from './Payment'
 
 const Cart = () => {
   const { cartItems } = useCartState()
+
+  const { isLoggedin, userData } = useUsersState()
 
   const [toastCount, setToastCount] = useState(0)
 
@@ -87,11 +90,8 @@ const Cart = () => {
               <div className="checkout">
                 <h3>Checkout</h3>
                 <h4>Total: ${cartTotal()}</h4>
-                <p>Delivery Address: aaa-666</p>
-                {/* <Link to='/'>Update Delivery Addres</Link> */}
-                <p>Payment options:</p>
-                <SiApplepay size={40} />
-                <FaPaypal size={40} />
+                <p>Delivery Address: {userData?.address}</p>
+                {cartItems.length > 0 && isLoggedin ? <Payment cartItems={cartItems} amount={cartTotal()} /> : <p>Please login first</p>}
               </div>
             </>
           )}

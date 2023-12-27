@@ -11,6 +11,7 @@ const Orders = () => {
   const { orders, isLoading, error, searchInput } = useSelector(
     (state: RootState) => state.ordersReducer
   )
+  console.log(orders);
 
   const dispatch: AppDispatch = useDispatch()
 
@@ -57,9 +58,10 @@ const Orders = () => {
             <td>Purchased at</td>
             <td>Cancel Order</td>
           </thead>
-          {searchResult.length > 0 &&
-            searchResult.map((order: Order) => {
+          {orders.length > 0 &&
+            orders.map((order: Order) => {
               const { id, productId, userId, purchasedAt } = order
+              console.log(order);
               return (
                 <tr key={id}>
                   <td>{id} </td>

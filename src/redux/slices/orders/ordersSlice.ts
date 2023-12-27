@@ -1,5 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../../../api'
+import axios from 'axios'
+import { API_BASE_URL } from '../users/userSlice'
 
 export type Order = {
   id: number
@@ -22,9 +24,21 @@ const initialState: OrdersState = {
   searchInput: ''
 }
 
+// export const fetchOrders = createAsyncThunk('fetchOrders', async () => {
+//   try {
+//     const response = await api.get('/mock/e-commerce/orders.json')
+//     if (!response) {
+//       throw new Error('Network erroe')
+//     }
+//     return response.data
+//   } catch (error) {
+//     console.log(error)
+//   }
+// })
+
 export const fetchOrders = createAsyncThunk('fetchOrders', async () => {
   try {
-    const response = await api.get('/mock/e-commerce/orders.json')
+    const response = await axios.get(`${API_BASE_URL}/orders`)
     if (!response) {
       throw new Error('Network erroe')
     }
@@ -52,7 +66,9 @@ export const ordersSlice = createSlice({
       state.isLoading = true
     })
     builder.addCase(fetchOrders.fulfilled, (state, action) => {
-      state.orders = action.payload
+      console.log(action.payload[0])
+      state.orders = action.payload[0]
+      //state.orders.push(action.payload[0])
       state.isLoading = false
     })
     builder.addCase(fetchOrders.rejected, (state, action) => {

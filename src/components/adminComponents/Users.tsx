@@ -42,8 +42,6 @@ const Users = () => {
     ? users.filter((user) => user.username.toLowerCase().includes(searchInput.toLowerCase()))
     : users
 
-  //! handle grant role here
-
   const handleDeleteUser = async (id: string | undefined) => {
     if (id) {
       try {
@@ -61,7 +59,9 @@ const Users = () => {
   }
 
   const handleBanStatus = async (id: string | undefined, isBanned: boolean | undefined) => {
-    if (id && isBanned) {
+    console.log('here');
+    console.log(id, isBanned);
+    if (id) {
       try {
         const response = isBanned ? await dispatch(unbanUser(id)) : await dispatch(banUser(id))
 

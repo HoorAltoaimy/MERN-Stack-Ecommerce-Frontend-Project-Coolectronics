@@ -1,23 +1,30 @@
 import { ChangeEvent, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import axios from 'axios'
 
 import { Order, deleteOrder, fetchOrders, searchOrder } from '../../redux/slices/orders/ordersSlice'
 import { AppDispatch, RootState } from '../../redux/store'
-
 import Search from '../products/Search'
 import AdminSidebar from './AdminSidebar'
+import showToast from '../../utils/toastUtils'
+
 
 const Orders = () => {
-  const { orders, isLoading, error, searchInput } = useSelector(
+  const { orders, searchInput, error } = useSelector(
     (state: RootState) => state.ordersReducer
   )
-  console.log(orders);
 
   const dispatch: AppDispatch = useDispatch()
 
   useEffect(() => {
+    if (error) {
+      showToast('error', error)
+    }
+  }, [error])
+
+  useEffect(() => {
     dispatch(fetchOrders())
-  }, [])
+  }, [dispatch])
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     const searchItem = event.target.value
@@ -25,19 +32,31 @@ const Orders = () => {
   }
 
   const searchResult = searchInput
-    ? orders.filter((order) => order.id === Number(searchInput))
+    ? orders.filter((order) => order._id === searchInput)
     : orders
 
-  const handleDeleteOrder = (id: number) => {
-    dispatch(deleteOrder(id))
+  const handleDeleteOrder = async (id: string) => {
+    if (id) {
+      try {
+        const response = await dispatch(deleteOrder(id))
+
+        if (response.meta.requestStatus === 'fulfilled') {
+          showToast('success', 'Order deleted successfully')
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          showToast('error', error?.response?.data.message)
+        }
+      }
+    }
   }
 
-  if (isLoading) {
-    return <p>Loading...</p>
-  }
-  if (error) {
-    return <p>{error}</p>
-  }
+  // if (isLoading) {
+  //   return <p>Loading...</p>
+  // }
+  // if (error) {
+  //   return <p>{error}</p>
+  // }
 
   return (
     <div className="admin-container">
@@ -58,21 +77,20 @@ const Orders = () => {
             <td>Purchased at</td>
             <td>Cancel Order</td>
           </thead>
-          {orders.length > 0 &&
-            orders.map((order: Order) => {
-              const { id, productId, userId, purchasedAt } = order
-              console.log(order);
+          {searchResult.length > 0 &&
+            searchResult.map((order: Order) => {
+              const { _id, products, buyer, createdAt } = order
               return (
-                <tr key={id}>
-                  <td>{id} </td>
-                  <td>{productId} </td>
-                  <td>{userId} </td>
-                  <td>{purchasedAt} </td>
+                <tr key={_id}>
+                  <td>{_id} </td>
+                  <td>{products[0]} </td>
+                  <td>{buyer} </td>
+                  <td>{createdAt} </td>
                   <td>
                     <button
                       className="btn"
                       onClick={() => {
-                        handleDeleteOrder(id)
+                        handleDeleteOrder(_id)
                       }}>
                       Cancel
                     </button>
